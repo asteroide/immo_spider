@@ -1,7 +1,6 @@
-# sudo apt-get install libxml2-dev libxslt1-dev python-dev
 
 cherrypy
-#jinja2
+jinja2
 lxml
 geojson
 geopy
