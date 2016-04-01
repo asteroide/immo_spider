@@ -17,7 +17,7 @@ class DBDriver:
         :param feature:
         :return: True if the feature was inserted in the database
         """
-        if not self.get(ad_id=feature['ad']['id']):
+        if not self.get(ad_id=feature['id']):
             self.spider_db.features.insert(feature)
             return True
         return False
@@ -35,11 +35,13 @@ class DBDriver:
             return result.append(list(self.spider_db.features.find(search)))
         elif ad_id:
             for doc in self.spider_db.features.find():
-                if doc['ad']['id'] == ad_id:
+                if doc['id'] == ad_id:
+                    doc.pop("_id")
                     return doc
         else:
             for doc in self.spider_db.features.find():
-                logger.info(doc.pop("_id"))
+                # logger.info(doc.pop("_id"))
+                doc.pop("_id")
                 result.append(doc)
         return result
 
