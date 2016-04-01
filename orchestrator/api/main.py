@@ -1,7 +1,5 @@
 import cherrypy
 import logging
-import json
-import os
 import socket
 import configparser
 from cherrypy import tools
@@ -31,8 +29,6 @@ class API(object):
     @tools.json_out()
     def data(self, id=None):
         # cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
-        # for item in db_driver.get():
-        #     logger.debug(item)
         if id:
             self.logger.info(self.db_driver.get(ad_id=id))
             return self.db_driver.get(ad_id=id)
