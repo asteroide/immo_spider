@@ -2,7 +2,7 @@
 
 sudo -E apt-get update
 
-sudo -E apt-get -y install python3-pip libxml2-dev libxslt1-dev python-dev mongodb-server zlib1g-dev
+sudo -E apt-get -y install apache2 python3-pip libxml2-dev libxslt1-dev python-dev mongodb-server zlib1g-dev
 
 cd /vagrant
 
