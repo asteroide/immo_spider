@@ -40,7 +40,6 @@ class DBDriver:
                     return doc
         else:
             for doc in self.spider_db.features.find():
-                # logger.info(doc.pop("_id"))
                 doc.pop("_id")
                 result.append(doc)
         return result
