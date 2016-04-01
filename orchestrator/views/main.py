@@ -9,4 +9,5 @@ class Views(object):
     @cherrypy.expose
     def index(self):
         tmpl = env.get_template('main.html')
-        return tmpl.render(salutation='Hello', target='World')
+        return tmpl.render()
+        # return tmpl.render(salutation='Hello', target='World')
