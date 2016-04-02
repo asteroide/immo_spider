@@ -2,6 +2,7 @@ import cherrypy
 import logging
 import socket
 import configparser
+from auth import AuthController, require
 from cherrypy import tools
 from plugins import import_plugin
 from geopy.geocoders import Nominatim
@@ -11,6 +12,13 @@ from plugins.save.mongo_driver import DBDriver
 
 
 class API(object):
+
+    _cp_config = {
+        'tools.sessions.on': True,
+        'tools.auth.on': True
+    }
+
+    auth = AuthController()
 
     def __init__(self):
         self.geolocator = Nominatim()
@@ -47,6 +55,7 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
+    @require()
     def sync(self):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
         ads = []
@@ -79,6 +88,7 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
+    @require()
     def purge(self):
         delete_count = self.db_driver.purge()
         return {"number": delete_count}

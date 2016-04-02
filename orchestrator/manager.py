@@ -3,6 +3,7 @@ import logging
 import os
 from api.main import API
 from views.main import Views
+from auth import AuthController
 import threading
 import time
 from requests.exceptions import ConnectionError
@@ -17,6 +18,7 @@ logger = logging.getLogger("orchestrator")
 
 api = API()
 views = Views()
+auth = AuthController()
 
 
 class WatchDog(threading.Thread):
@@ -49,6 +51,7 @@ cherrypy.config.update(os.path.join(os.getcwd(), "main.conf"))
 
 cherrypy.tree.mount(views, "/", config=os.path.join(os.getcwd(), "main.conf"))
 cherrypy.tree.mount(api, "/api", config=os.path.join(os.getcwd(), "main.conf"))
+cherrypy.tree.mount(auth, "/auth", config=os.path.join(os.getcwd(), "main.conf"))
 
 cherrypy.engine.start()
 cherrypy.engine.block()
