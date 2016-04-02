@@ -1,6 +1,6 @@
 import logging
 from pymongo import MongoClient
-
+from exceptions import AuthException
 
 logger = logging.getLogger("spider.save")
 
@@ -53,3 +53,8 @@ class DBDriver:
         result = self.spider_db.features.delete_many({})
         return result.deleted_count
 
+    def check_auth(self, username, password):
+        user = self.spider_db.auth.find_one({'username': username})
+        if user and password == user['password']:
+            return True
+        raise AuthException()
