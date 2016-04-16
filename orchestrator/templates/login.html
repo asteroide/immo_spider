@@ -1,12 +1,19 @@
+<!DOCTYPE html>
 <html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>Immo Login</title>
+    </head>
     <body>
-        <form method="post" action="/auth/login">
-            <input type="hidden" name="from_page" value="{{ from_page }}" />
-            {{ msg }}<br />
-            Username: <input type="text" name="username" value="{{ username }}" /><br />
-            Password: <input type="password" name="password" /><br />
-            <!--Add CRSF check-->
-            <input type="submit" value="Log in" />
-        </form>
+        <div id="login">
+            <form method="post" action="/auth/login">
+                <input type="hidden" name="from_page" value="{{ from_page }}" />
+                {{ msg }}<br />
+                Username: <input type="text" name="username" value="{{ username }}" /><br />
+                Password: <input type="password" name="password" /><br />
+                <!--Add CRSF check-->
+                <input type="submit" value="Log in" />
+            </form>
+        </div>
     </body>
 </html>
