@@ -8,8 +8,9 @@ import cherrypy
 from html import escape
 from jinja2 import Environment, FileSystemLoader
 import urllib.parse
-from plugins.save import mongo_driver
 import hashlib
+from plugins.save import mongo_driver
+from plugins.save.mongo_driver import DBDriver
 
 SESSION_KEY = '_cp_username'
 env = Environment(loader=FileSystemLoader('templates'))
@@ -81,7 +82,7 @@ def require(*conditions):
 def member_of(groupname):
     def check():
         # replace with actual check if <username> is in <groupname>
-        return cherrypy.request.login == 'joe' and groupname == 'admin'
+        return cherrypy.request.login == 'admin' and groupname == 'admin'
     return check
 
 
@@ -117,6 +118,8 @@ def all_of(*conditions):
 
 class AuthController(object):
 
+    db_driver = DBDriver()
+
     def on_login(self, username):
         """Called on successful login"""
 
@@ -151,3 +154,19 @@ class AuthController(object):
             cherrypy.request.login = None
             self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")
+
+    @cherrypy.expose
+    @require()
+    def manage(self, username=None, password1=None, password2=None, check=None):
+        print("Request manage... {}, {} {}".format(cherrypy.request.method, type(check), check))
+        if cherrypy.request.method == "POST":
+            if username and password1 and password2 and password1 == password2:
+                self.db_driver.add_user(username, password1)
+            elif check:
+                if type(check) is str:
+                    check = [check, ]
+                self.db_driver.del_user(check)
+        tmpl = env.get_template('manage.html')
+        return tmpl.render(users=self.db_driver.get_user())
+
+
