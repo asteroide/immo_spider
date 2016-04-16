@@ -1,12 +1,13 @@
 #map {
     position: relative;
     left: 0;
-    height: 512px;
+    height: 700px;
     width: 100%;
 }
-.ol-attribution a {
-     color: black;
-}
+
+/*.ol-attribution a {*/
+     /*color: black;*/
+/*}*/
 
 #title {
     position: relative;
@@ -18,16 +19,20 @@
 }
 
 #info {
-    width: 150px;
+    width: 500px;
     height: 300px;
-    padding: 0.5em;
-    background: #d0d0d0;
-    border: 3px solid #0077ad;
+    padding: 1em;
+    /*background: #d0d0d0;*/
+    /*border: 3px solid #0077ad;*/
 }
 
-#draggable {
-    width: 150px;
-    height: 150px;
-    padding: 0.5em;
-    background: #FFFFFF;
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+    padding: 0.25em;
 }
+
+/*#draggable {*/
+    /*width: 150px;*/
+    /*height: 150px;*/
+    /*padding: 0.5em;*/
+    /*background: #FFFFFF;*/
+/*}*/
