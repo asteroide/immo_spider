@@ -1,4 +1,10 @@
 
+function showDialog() {
+    $( "#toggle" ).show();
+    $( "#info" ).tabs();
+    $( "#info" ).dialog();
+}
+
 var raster = new ol.layer.Tile({
     title: "Immo Spider",
     source: new ol.source.OSM()
@@ -49,16 +55,50 @@ var map = new ol.Map({
     ])
 });
 
-function selectAD(feature) {
-    console.log(feature);
-    console.log(feature['i']);
-    var infoElement = document.getElementById('info');
-    $.getJSON('http://127.0.0.1:8080/api/data?id='+feature['i'],
-        function(data) {
-            infoElement.innerHTML = '<h1>'+data["address"]+'</h1><p>'+data["description"]+'</p>';
-            console.log(data["address"]);
-        });
+var infoList;
 
+function updateInfo(data_index) {
+    var data = infoList[data_index];
+    var infoElement1 = document.getElementById('tabs-1-content');
+    var infoElement2 = document.getElementById('tabs-2-content');
+    var infoElement3 = document.getElementById('tabs-3-content');
+    var infoElement4 = document.getElementById('tabs-4-content');
+    infoElement1.innerHTML =
+        '<h1>'+data["address"]+'</h1>'+data["description"]+ '<br>' +
+            '<a href="'+data["url"]+'" target="_blank">link to the ad</a>';
+    infoElement2.innerHTML =
+        'TODO';
+    infoElement3.innerHTML =
+            'surface : ' + data["surface"] + "<br/>" +
+            'jardin : ' + data["groundsurface"] + "<br/>" +
+            'prix : ' + data["price"] + "<br/>" +
+            'date : ' + data["date"] + "<br/>";
+    infoElement4.innerHTML =
+        'TODO'
+    ;
+}
+
+function selectAD(feature) {
+    var infolink = document.getElementById('info-link');
+    $.getJSON('http://127.0.0.1:8080/api/data?geoid='+feature['i'],
+        function(data_list) {
+            //var data = data_list[0];
+            infoList = data_list;
+            if (data_list.length > 1) {
+                infolink.innerHTML = "";
+                for (var i=0 ; i<data_list.length ; i++) {
+                    //console.log('<a href="#" onclick="updateInfo('+JSON.stringify(data_list[i])+')">annonce '+i+'</a> ');
+                    var json_str = JSON.stringify(data_list[i]);
+                    infolink.innerHTML += '<a href="#" onclick="updateInfo('+i+')">annonce '+i+'</a> ';
+                }
+                //console.log(infolink.innerHTML);
+            }
+            else {
+                infolink.innerHTML = "";
+            }
+            updateInfo(0);
+        });
+    showDialog();
     return new ol.style.Style({
         image: new ol.style.Circle({
             radius: 5,
