@@ -27,7 +27,7 @@ class WatchDog(threading.Thread):
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self)
         self.__stop = False
-        self.__timer = 60
+        self.__timer = 3600
 
     def stop(self):
         logger.info("Stop thread...")
