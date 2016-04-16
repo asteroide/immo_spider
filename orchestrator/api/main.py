@@ -9,6 +9,7 @@ from geopy.geocoders import Nominatim
 from geojson import Feature, Point, FeatureCollection
 from geopy.exc import GeocoderTimedOut
 from plugins.save.mongo_driver import DBDriver
+import hashlib
 
 
 class API(object):
@@ -28,6 +29,25 @@ class API(object):
         self.config = configparser.ConfigParser()
         self.config.read('../main.py')
 
+    def __get_geocode(self, address):
+        _location = None
+        _feature = None
+        try:
+            try:
+                _location = self.geolocator.geocode("{}, France".format(address))
+            except Exception as e:
+                self.logger.error(str(e))
+            else:
+                self.logger.debug(_location)
+            # self.logger.info("address={}".format(_ad['address']))
+            # self.logger.info("_location={}".format(_location))
+            _feature = Feature(geometry=Point((_location.longitude, _location.latitude)))
+        except socket.timeout:
+            self.logger.warning("Timeout during retrieving geocode for {}".format(address))
+        except GeocoderTimedOut:
+            self.logger.warning("Timeout during retrieving geocode for {}".format(address))
+        return _feature
+
     @cherrypy.expose
     @tools.json_out()
     def index(self):
@@ -35,20 +55,25 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
-    def data(self, id=None):
+    @require()
+    def data(self, geoid=None):
         # cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
         if id:
-            self.logger.info(self.db_driver.get(ad_id=id))
-            return self.db_driver.get(ad_id=id)
+            return self.db_driver.get(geo_id=geoid)
         return self.db_driver.get()
 
     @cherrypy.expose
     @tools.json_out()
+    @require()
     def features(self, choice=None):
         features = list()
         for _ad in self.db_driver.get():
             _feature = _ad['feature']
-            _feature['id'] = _ad['id']
+            coord = str(_feature['geometry']['coordinates']).encode('utf-8')
+            h_coord = hashlib.sha224(coord).hexdigest()
+            self.logger.debug("h_coord: {}".format(h_coord))
+            # _feature['id'] = _ad['id']
+            _feature['id'] = h_coord
             self.logger.info(_feature)
             features.append(_feature)
         return FeatureCollection(features)
@@ -57,26 +82,13 @@ class API(object):
     @tools.json_out()
     @require()
     def sync(self):
-        cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
+        # cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
         ads = []
         for _plug_name, _plugin in self.plugins.items():
             try:
                 _ads = _plugin.__driver__.compute()
-                # logger.debug(_ads)
                 for _ad in _ads:
-                    try:
-                        _location = self.geolocator.geocode("{}, France".format(_ad['address']))
-                        # self.logger.info("address={}".format(_ad['address']))
-                        # self.logger.info("_location={}".format(_location))
-                        _feature = Feature(geometry=Point((_location.longitude, _location.latitude)))
-                    except socket.timeout:
-                        self.logger.warning("Timeout during retrieving geocode for {}".format(_ad['address']))
-                        _feature = None
-                    except GeocoderTimedOut:
-                        self.logger.warning("Timeout during retrieving geocode for {}".format(_ad['address']))
-                        _feature = None
-                    _ad['feature'] = _feature
-                    # _feature["ad"] = _ad
+                    _ad['feature'] = self.__get_geocode(_ad['address'])
                     if self.db_driver.insert(_ad):
                         ads.append(_ad)
             except AttributeError as e:
