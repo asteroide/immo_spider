@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 from api.main import API
-from views.main import Views
+from views.main import Views, ManagementArea
 from auth import AuthController
 import threading
 import time
@@ -19,6 +19,7 @@ logger = logging.getLogger("orchestrator")
 
 api = API()
 views = Views()
+manager_area = ManagementArea()
 auth = AuthController()
 
 
@@ -50,7 +51,6 @@ class WatchDog(threading.Thread):
                 cpt += 1
 
 
-
 watchdog = WatchDog()
 watchdog.start()
 
@@ -69,6 +69,7 @@ cherrypy.config.update(os.path.join(os.getcwd(), "main.conf"))
 
 cherrypy.tree.mount(views, "/", config=os.path.join(os.getcwd(), "main.conf"))
 cherrypy.tree.mount(api, "/api", config=os.path.join(os.getcwd(), "main.conf"))
+cherrypy.tree.mount(manager_area, "/manage", config=os.path.join(os.getcwd(), "main.conf"))
 cherrypy.tree.mount(auth, "/auth", config=os.path.join(os.getcwd(), "main.conf"))
 # cherrypy.engine.signal_handler.subscribe()
 cherrypy.engine.signal_handler.set_handler('SIGINT', watchdog.stop)

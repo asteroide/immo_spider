@@ -155,18 +155,3 @@ class AuthController(object):
             self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")
 
-    @cherrypy.expose
-    @require()
-    def manage(self, username=None, password1=None, password2=None, check=None):
-        print("Request manage... {}, {} {}".format(cherrypy.request.method, type(check), check))
-        if cherrypy.request.method == "POST":
-            if username and password1 and password2 and password1 == password2:
-                self.db_driver.add_user(username, password1)
-            elif check:
-                if type(check) is str:
-                    check = [check, ]
-                self.db_driver.del_user(check)
-        tmpl = env.get_template('manage.html')
-        return tmpl.render(users=self.db_driver.get_user())
-
-
