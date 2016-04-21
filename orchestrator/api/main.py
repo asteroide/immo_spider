@@ -95,7 +95,7 @@ class API(object):
                 self.logger.error('Unable to open plugin {}'.format(_plug_name))
                 self.logger.debug(str(e))
 
-        return {"number": len(ads)}
+        return {"action": "sync", "number": len(ads)}
         # return FeatureCollection(ads)
 
     @cherrypy.expose
@@ -103,4 +103,4 @@ class API(object):
     @require()
     def purge(self):
         delete_count = self.db_driver.purge()
-        return {"number": delete_count}
+        return {"action": "purge", "number": delete_count}
