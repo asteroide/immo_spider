@@ -1,8 +1,70 @@
 
+var feature_colors = new Array();
+
 function showDialog() {
     $( "#toggle" ).show();
     $( "#info" ).tabs();
     $( "#info" ).dialog();
+}
+
+function selectAD(feature) {
+    var infolink = document.getElementById('info-link');
+    $.getJSON('/api/data?geoid='+feature['i'],
+        function(data_list) {
+            //var data = data_list[0];
+            infoList = data_list;
+            if (data_list.length > 1) {
+                infolink.innerHTML = "";
+                for (var i=0 ; i<data_list.length ; i++) {
+                    //console.log('<a href="#" onclick="updateInfo('+JSON.stringify(data_list[i])+')">annonce '+i+'</a> ');
+                    var json_str = JSON.stringify(data_list[i]);
+                    infolink.innerHTML += '<a href="#" onclick="updateInfo('+i+')">annonce '+i+'</a> ';
+                }
+                //console.log(infolink.innerHTML);
+            }
+            else {
+                infolink.innerHTML = "";
+            }
+            updateInfo(0);
+        });
+    showDialog();
+    return new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 10,
+            fill: new ol.style.Fill({
+                color: '#FFFFFF'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#FF0000'
+            })
+        })
+    })
+}
+
+function getColoredPoint(feature, resolution) {
+    var color = "#0000FF";
+    $.ajax({
+        'async': false,
+        'type': "POST",
+        'global': false,
+        'url': '/api/data?geoid='+feature['i'],
+        'success': function (data) {
+            color = data[0].color;
+            //feature.style.color = color;
+        }
+    });
+    //feature_colors.append(feature['i'],color);
+    return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 5,
+                    fill: new ol.style.Fill({
+                        color: color
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#000000'
+                    })
+                })
+            });
 }
 
 var raster = new ol.layer.Tile({
@@ -10,27 +72,19 @@ var raster = new ol.layer.Tile({
     source: new ol.source.OSM()
 });
 
-var vector = new ol.layer.Vector({
-    title: 'Houses',
-    source: new ol.source.Vector({
-        url: 'http://127.0.0.1:8080/api/features',
+var vectorSource = new ol.source.Vector({
+        url: '/api/features',
         format: new ol.format.GeoJSON()
     },
     {
-        //tileOptions: {crossOriginKeyword: 'anonymous'},
+        // tileOptions: {crossOriginKeyword: 'anonymous'},
         transitionEffect: null
-    }),
-    style: new ol.style.Style({
-        image: new ol.style.Circle({
-            radius: 5,
-            fill: new ol.style.Fill({
-                color: '#0000FF'
-            }),
-            stroke: new ol.style.Stroke({
-                color: '#000000'
-            })
-        })
-    })
+    });
+
+var vector = new ol.layer.Vector({
+    title: 'Houses',
+    source: vectorSource,
+    style: getColoredPoint
 });
 
 var map = new ol.Map({
@@ -55,6 +109,13 @@ var map = new ol.Map({
     ])
 });
 
+function  hide_add() {
+    $.getJSON('/api/data?geoid='+feature['i']+'&action=hide',
+        function(data_list) {
+            document.reload();
+        });
+}
+
 var infoList;
 
 function updateInfo(data_index) {
@@ -74,40 +135,44 @@ function updateInfo(data_index) {
             'prix : ' + data["price"] + "<br/>" +
             'date : ' + data["date"] + "<br/>";
     infoElement4.innerHTML =
-        'TODO'
+        "<div class='right'><a href='#' onclick='hide_add()' class='button'>Cacher</a></div>"
     ;
 }
 
-function selectAD(feature) {
-    var infolink = document.getElementById('info-link');
-    $.getJSON('http://127.0.0.1:8080/api/data?geoid='+feature['i'],
-        function(data_list) {
-            //var data = data_list[0];
-            infoList = data_list;
-            if (data_list.length > 1) {
-                infolink.innerHTML = "";
-                for (var i=0 ; i<data_list.length ; i++) {
-                    //console.log('<a href="#" onclick="updateInfo('+JSON.stringify(data_list[i])+')">annonce '+i+'</a> ');
-                    var json_str = JSON.stringify(data_list[i]);
-                    infolink.innerHTML += '<a href="#" onclick="updateInfo('+i+')">annonce '+i+'</a> ';
-                }
-                //console.log(infolink.innerHTML);
-            }
-            else {
-                infolink.innerHTML = "";
-            }
-            updateInfo(0);
-        });
-    showDialog();
-    return new ol.style.Style({
-        image: new ol.style.Circle({
-            radius: 5,
-            fill: new ol.style.Fill({
-                color: '#00FF00'
-            }),
-            stroke: new ol.style.Stroke({
-                color: '#000000'
-            })
-        })
-    })
-}
+//map_interaction = new ol.interaction.defaults().extend([
+//        ol.interaction.Select({
+//            style: selectAD
+//        })]);
+//
+//map.addInteraction(map_interaction);
+
+//console.log(feature_colors);
+//
+//vector.getSource().once('change',function(e) {
+//    if (vector.getSource().getState() === 'ready') {
+//        vector.getSource().forEachFeature(function (feature) {
+//                //var id = feature.get('i');
+//                //console.log("forEachFeature: " + feature_colors[feature.i]);
+//                feature.setStyle(new ol.style.Style({
+//                    image: new ol.style.Circle({
+//                        radius: 5,
+//                        fill: new ol.style.Fill({
+//                            color: '#003344'
+//                        }),
+//                        stroke: new ol.style.Stroke({
+//                            color: '#000000'
+//                        })
+//                    })
+//                }));
+//            }
+//        );
+//    }
+//});
+//
+//
+////vectorSource.forEachFeature(function (feature) {
+////        var id = feature.get('i');
+////        console.log("forEachFeature: " + id);
+////    });
+//
+//console.log("after forEachFeature");
