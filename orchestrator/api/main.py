@@ -11,6 +11,15 @@ from geopy.exc import GeocoderTimedOut
 from plugins.save.mongo_driver import DBDriver
 import hashlib
 
+price_colors = (
+    # (color, min, max)
+    ("#000000", 0, 50000),
+    ("#318731", 50001, 90000),
+    ("#99ff33", 90001, 120000),
+    ("#ffad26", 120001, 150000),
+    ("#ff0000", 150001, 200000),
+)
+
 
 class API(object):
 
@@ -48,6 +57,15 @@ class API(object):
             self.logger.warning("Timeout during retrieving geocode for {}".format(address))
         return _feature
 
+    @staticmethod
+    def __get_color_from_price(price):
+        if type(price) is not int:
+            price = int(price)
+        for item in price_colors:
+            if item[1] < price < item[2]:
+                return item[0]
+        return "#000000"
+
     @cherrypy.expose
     @tools.json_out()
     def index(self):
@@ -56,24 +74,37 @@ class API(object):
     @cherrypy.expose
     @tools.json_out()
     @require()
-    def data(self, geoid=None):
-        # cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
-        if id:
-            return self.db_driver.get(geo_id=geoid)
-        return self.db_driver.get()
+    def data(self, geoid=None, uuid=None, action=None):
+        # cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        data = list()
+        if geoid:
+            data = self.db_driver.get(geo_id=geoid)
+        elif uuid:
+            data = self.db_driver.get(uuid=uuid)
+        else:
+            data = self.db_driver.get()
+        for _data in data:
+            color = self.__get_color_from_price(_data['price'])
+            _data['color'] = color
+        self.logger.debug(data)
+        return data
 
     @cherrypy.expose
     @tools.json_out()
     @require()
     def features(self, choice=None):
+        # cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
         features = list()
         for _ad in self.db_driver.get():
             _feature = _ad['feature']
+            color = self.__get_color_from_price(_ad['price'])
             coord = str(_feature['geometry']['coordinates']).encode('utf-8')
             h_coord = hashlib.sha224(coord).hexdigest()
             self.logger.debug("h_coord: {}".format(h_coord))
+            self.logger.debug("color: {}".format(color))
             # _feature['id'] = _ad['id']
             _feature['id'] = h_coord
+            _feature['color'] = color
             self.logger.info(_feature)
             features.append(_feature)
         return FeatureCollection(features)
