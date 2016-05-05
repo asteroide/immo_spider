@@ -1,3 +1,26 @@
+"""Mongo DB Driver
+
+data = {
+    'address': '',
+    'date': '21/04/2016',
+    'description': '',
+    'extra': {'options': ''},
+    'feature': {
+        'geometry': {
+            'coordinates': [-2.5429138, 47.614847],
+            'type': 'Point'
+        },
+        'properties': {},
+        'type': 'Feature'
+    },
+    'groundsurface': '103m²',
+    'id': '',
+    'price': '97 550\xa0€',
+    'surface': '60m²',
+    'url': 'https://www.ouestfrance-immo.com/immobilier/vente/maison/lauzach-56-56109/10696538.htm'
+}
+"""
+
 import logging
 import hashlib
 from pymongo import MongoClient
@@ -19,16 +42,27 @@ class DBDriver:
         :param feature:
         :return: True if the feature was inserted in the database
         """
-        if not self.get(ad_id=feature['id']):
+        if not self.get(uuid=feature['id']):
+            feature['show'] = True
             self.spider_db.features.insert(feature)
             return True
         return False
 
-    def get(self, search=None, ad_id=None, geo_id=None):
+    def hide(self, uuid):
+        count = self.spider_db.features.update_one(
+            {"id": uuid},
+            {"$set": {"show": False}}
+        )
+        if count.acknowledged:
+            return True
+        self.logger.error("Cannot find ad with UUID {}".format(uuid))
+
+    def get(self, search=None, uuid=None, geo_id=None):
         """Get one or more feature
 
         :param search: a search dictionary
-        :param ad_id: the ID of an ad
+        :param uuid: the ID of an ad
+        :param geo_id: the GEOID of an ad
         :return: a list of features
         """
 
@@ -36,14 +70,15 @@ class DBDriver:
         # self.logger.debug("mongo.get geo_id={}".format(geo_id))
         if search:
             return result.append(list(self.spider_db.features.find(search)))
-        elif ad_id:
+        elif uuid:
             for doc in self.spider_db.features.find():
-                if doc['id'] == ad_id:
+                if doc['id'] == uuid:
                     doc.pop("_id")
                     result.append(doc)
         elif geo_id:
             for doc in self.spider_db.features.find():
-                # self.logger.debug("mongo.get doc={}".format(doc['id']))
+                if "show" in doc and not doc["show"]:
+                    continue
                 coord = str(doc['feature']['geometry']['coordinates']).encode('utf-8')
                 h_coord = hashlib.sha224(coord).hexdigest()
                 if h_coord == geo_id:
@@ -53,7 +88,7 @@ class DBDriver:
             for doc in self.spider_db.features.find():
                 doc.pop("_id")
                 result.append(doc)
-        self.logger.debug("mongo.get result={}".format(result))
+        # self.logger.debug("mongo.get result={}".format(result))
         return result
 
     def purge(self):
