@@ -11,7 +11,8 @@ __urls__ = [
     "https://www.ouestfrance-immo.com/acheter/maison/?lieux=24303&rayon=30&prix=0_200000",
     "https://www.ouestfrance-immo.com/acheter/maison/?lieux=24163&rayon=30&prix=0_200000",
     "https://www.ouestfrance-immo.com/acheter/maison/dinard-35-35800/?prix=0_200000",
-    "https://www.ouestfrance-immo.com/acheter/maison/lamballe-22-22400/?prix=0_200000"
+    "https://www.ouestfrance-immo.com/acheter/maison/lamballe-22-22400/?prix=0_200000",
+    "https://www.ouestfrance-immo.com/acheter/maison/guerande-44-44350/?prix=0_200000"
 ]
 # https://www.ouestfrance-immo.com/acheter/maison/vannes-56-56000/?prix=50000_80000&surface=60_0&chambres=3_0
 
