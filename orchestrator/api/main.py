@@ -76,6 +76,10 @@ class API(object):
     @require()
     def data(self, geoid=None, uuid=None, action=None):
         # cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        self.logger.debug("Calling data with {} {} {}".format(geoid, uuid, action))
+        if action == "hide":
+            self.db_driver.hide(uuid=uuid)
+            return
         data = list()
         if geoid:
             data = self.db_driver.get(geo_id=geoid)

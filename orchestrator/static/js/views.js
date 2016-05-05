@@ -1,5 +1,4 @@
-
-var feature_colors = new Array();
+var infoData = {};
 
 function showDialog() {
     $( "#toggle" ).show();
@@ -9,23 +8,24 @@ function showDialog() {
 
 function selectAD(feature) {
     var infolink = document.getElementById('info-link');
+    var info_key;
     $.getJSON('/api/data?geoid='+feature['i'],
         function(data_list) {
-            //var data = data_list[0];
-            infoList = data_list;
             if (data_list.length > 1) {
                 infolink.innerHTML = "";
                 for (var i=0 ; i<data_list.length ; i++) {
-                    //console.log('<a href="#" onclick="updateInfo('+JSON.stringify(data_list[i])+')">annonce '+i+'</a> ');
-                    var json_str = JSON.stringify(data_list[i]);
-                    infolink.innerHTML += '<a href="#" onclick="updateInfo('+i+')">annonce '+i+'</a> ';
+                    info_key = feature['i'] + "_" + i;
+                    infolink.innerHTML += '<a href="#" onclick="updateInfo('+info_key+')">annonce '+i+'</a> ';
+                    infoData[info_key] = data_list[i];
                 }
-                //console.log(infolink.innerHTML);
             }
             else {
                 infolink.innerHTML = "";
+                info_key = feature['i'] + "_0";
+                infoData[info_key] = data_list[0];
             }
-            updateInfo(0);
+            info_key = feature['i'] + "_0";
+            updateInfo(info_key);
         });
     showDialog();
     return new ol.style.Style({
@@ -42,18 +42,25 @@ function selectAD(feature) {
 }
 
 function getColoredPoint(feature, resolution) {
-    var color = "#0000FF";
+    var color = "#bbbbbb";
+    var stroke = "#000000";
     $.ajax({
         'async': false,
         'type': "POST",
         'global': false,
         'url': '/api/data?geoid='+feature['i'],
         'success': function (data) {
-            color = data[0].color;
-            //feature.style.color = color;
+            if (data.length > 0) {
+                color = data[0].color;
+                for (var cpt = 0 ; cpt++ ; cpt<data.length) {
+                    infoData[feature['i'] + "_" + cpt] = null;
+                }
+            }
+            else {
+                stroke = "#bbbbbb";
+            }
         }
     });
-    //feature_colors.append(feature['i'],color);
     return new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 5,
@@ -61,7 +68,7 @@ function getColoredPoint(feature, resolution) {
                         color: color
                     }),
                     stroke: new ol.style.Stroke({
-                        color: '#000000'
+                        color: stroke
                     })
                 })
             });
@@ -77,7 +84,6 @@ var vectorSource = new ol.source.Vector({
         format: new ol.format.GeoJSON()
     },
     {
-        // tileOptions: {crossOriginKeyword: 'anonymous'},
         transitionEffect: null
     });
 
@@ -109,17 +115,15 @@ var map = new ol.Map({
     ])
 });
 
-function  hide_add() {
-    $.getJSON('/api/data?geoid='+feature['i']+'&action=hide',
+function  hide_ad(uuid) {
+    $.getJSON('/api/data?uuid='+uuid+'&action=hide',
         function(data_list) {
-            document.reload();
+            location.reload();
         });
 }
 
-var infoList;
-
-function updateInfo(data_index) {
-    var data = infoList[data_index];
+function updateInfo(data_uuid) {
+    var data = infoData[data_uuid];
     var infoElement1 = document.getElementById('tabs-1-content');
     var infoElement2 = document.getElementById('tabs-2-content');
     var infoElement3 = document.getElementById('tabs-3-content');
@@ -135,44 +139,6 @@ function updateInfo(data_index) {
             'prix : ' + data["price"] + "<br/>" +
             'date : ' + data["date"] + "<br/>";
     infoElement4.innerHTML =
-        "<div class='right'><a href='#' onclick='hide_add()' class='button'>Cacher</a></div>"
+        "<div class='right'><a href='#' onclick='hide_ad(\""+data["id"]+"\")' class='button'>Cacher</a></div>"
     ;
 }
-
-//map_interaction = new ol.interaction.defaults().extend([
-//        ol.interaction.Select({
-//            style: selectAD
-//        })]);
-//
-//map.addInteraction(map_interaction);
-
-//console.log(feature_colors);
-//
-//vector.getSource().once('change',function(e) {
-//    if (vector.getSource().getState() === 'ready') {
-//        vector.getSource().forEachFeature(function (feature) {
-//                //var id = feature.get('i');
-//                //console.log("forEachFeature: " + feature_colors[feature.i]);
-//                feature.setStyle(new ol.style.Style({
-//                    image: new ol.style.Circle({
-//                        radius: 5,
-//                        fill: new ol.style.Fill({
-//                            color: '#003344'
-//                        }),
-//                        stroke: new ol.style.Stroke({
-//                            color: '#000000'
-//                        })
-//                    })
-//                }));
-//            }
-//        );
-//    }
-//});
-//
-//
-////vectorSource.forEachFeature(function (feature) {
-////        var id = feature.get('i');
-////        console.log("forEachFeature: " + id);
-////    });
-//
-//console.log("after forEachFeature");
