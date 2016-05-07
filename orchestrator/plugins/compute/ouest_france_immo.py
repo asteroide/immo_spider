@@ -56,6 +56,8 @@ class ofi(object):
         options = " ".join(tree.xpath('/html/body/div/section/div/div/div/ul/li[@class="options"]/text()'))
         surface = " ".join(tree.xpath('/html/body/div/section/div/div/div/ul/li[text()="Surf. habitable : "]/strong/text()')).replace(" ", "")
         date = " ".join(tree.xpath('/html/body/div/section/div/h2/em/text()')).replace(" ", "").split("-")[-1].strip()
+        img_urls = map(lambda x: x.get("src"), tree.xpath('//ul/li/img'))
+        img_urls = list(filter(lambda x: "photo" in x, img_urls))
         return {
             'id': _id,
             'address': address,
@@ -65,6 +67,7 @@ class ofi(object):
             "surface": surface,
             "groundsurface": ground_surface,
             "url": url,
+            "img_urls": img_urls,
             "extra": {
                 "options": options
             },

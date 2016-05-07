@@ -1,5 +1,7 @@
 var infoData = {};
 
+$( "#info" ).hide();
+
 function showDialog() {
     $( "#toggle" ).show();
     $( "#info" ).tabs();
@@ -15,7 +17,7 @@ function selectAD(feature) {
                 infolink.innerHTML = "";
                 for (var i=0 ; i<data_list.length ; i++) {
                     info_key = feature['i'] + "_" + i;
-                    infolink.innerHTML += '<a href="#" onclick="updateInfo('+info_key+')">annonce '+i+'</a> ';
+                    infolink.innerHTML += '<a href="#" onclick="updateInfo(\'' + info_key + '\')">annonce '+i+'</a> ';
                     infoData[info_key] = data_list[i];
                 }
             }
@@ -131,8 +133,12 @@ function updateInfo(data_uuid) {
     infoElement1.innerHTML =
         '<h1>'+data["address"]+'</h1>'+data["description"]+ '<br>' +
             '<a href="'+data["url"]+'" target="_blank">link to the ad</a>';
-    infoElement2.innerHTML =
-        'TODO';
+    var tmp = "";
+    infoElement2.innerHTML = "";
+    for (var cpt=0 ; cpt<data["img_urls"].length ; cpt++){
+        tmp += "<img src='"+ data["img_urls"][cpt] +"' width='200px'>";
+    }
+    infoElement2.innerHTML = tmp;
     infoElement3.innerHTML =
             'surface : ' + data["surface"] + "<br/>" +
             'jardin : ' + data["groundsurface"] + "<br/>" +
