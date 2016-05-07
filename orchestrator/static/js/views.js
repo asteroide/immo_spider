@@ -5,7 +5,8 @@ $( "#info" ).hide();
 function showDialog() {
     $( "#toggle" ).show();
     $( "#info" ).tabs();
-    $( "#info" ).dialog();
+    $( "#info" ).dialog({ width: 700, height: 500 });
+    $( "#info" ).dialog("option", "position", 'top');
 }
 
 function selectAD(feature) {
