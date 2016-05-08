@@ -48,6 +48,17 @@ class DBDriver:
             return True
         return False
 
+    def delete(self, uuid):
+        """Delete one feature
+
+        :param uuid:
+        :return: True if the feature was deleted in the database
+        """
+        result = self.spider_db.features.delete_one({'id': uuid})
+        if result.deleted_count == 1:
+            return True
+        return False
+
     def hide(self, uuid):
         count = self.spider_db.features.update_one(
             {"id": uuid},

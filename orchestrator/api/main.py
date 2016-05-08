@@ -1,6 +1,7 @@
 import cherrypy
 import logging
 import socket
+import requests
 import configparser
 from auth import AuthController, require
 from cherrypy import tools
@@ -80,18 +81,18 @@ class API(object):
         if action == "hide":
             self.db_driver.hide(uuid=uuid)
             return
-        data = list()
+        _items = list()
         if geoid:
-            data = self.db_driver.get(geo_id=geoid)
+            _items = self.db_driver.get(geo_id=geoid)
         elif uuid:
-            data = self.db_driver.get(uuid=uuid)
+            _items = self.db_driver.get(uuid=uuid)
         else:
-            data = self.db_driver.get()
-        for _data in data:
+            _items = self.db_driver.get()
+        for _data in _items:
             color = self.__get_color_from_price(_data['price'])
             _data['color'] = color
-        self.logger.debug(data)
-        return data
+        self.logger.debug(_items)
+        return _items
 
     @cherrypy.expose
     @tools.json_out()
@@ -139,3 +140,18 @@ class API(object):
     def purge(self):
         delete_count = self.db_driver.purge()
         return {"action": "purge", "number": delete_count}
+
+    @cherrypy.expose
+    @tools.json_out()
+    @require()
+    def check(self):
+        _items = self.db_driver.get()
+        results = []
+        for _item in _items:
+            # self.logger.debug(_item['url'])
+            req = requests.get(_item['url'], verify=False)
+            if req.status_code not in (200, 201):
+                self.logger.warning("Error checking {}".format(_item['url']))
+                if self.db_driver.delete(_item['id']):
+                    results.append(_item['address'])
+        return {"action": "check", "number": len(results), "message": " ".join(results)}
