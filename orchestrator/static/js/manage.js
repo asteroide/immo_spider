@@ -10,6 +10,8 @@ function update_action_info(action) {
             if (message in data_list) {
                 $( "#message" ).dialog({ width: 700, height: 500 });
                 $( "#message").innerHTML = data_list.message;
+                console.log("update_action_info "+action+" "+data_list.message);
+                $( "#message").show();
             }
         });
 }
