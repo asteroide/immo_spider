@@ -131,7 +131,7 @@ class API(object):
                 self.logger.error('Unable to open plugin {}'.format(_plug_name))
                 self.logger.debug(str(e))
 
-        return {"action": "sync", "number": len(ads)}
+        return {"action": "sync", "number": len(ads), 'message': " ".join(map(lambda x: x['address'], ads))}
         # return FeatureCollection(ads)
 
     @cherrypy.expose

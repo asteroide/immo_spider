@@ -16,7 +16,8 @@ class Views(object):
     auth = AuthController()
 
     def __init__(self):
-        print("Views {}".format(self._cp_config))
+        self.logger = logging.getLogger("spider.views")
+        self.logger.debug("Views {}".format(self._cp_config))
 
     @cherrypy.expose
     @require()
@@ -37,7 +38,8 @@ class ManagementArea(object):
     auth = AuthController()
 
     def __init__(self):
-        print("ManagementArea {}".format(self._cp_config))
+        self.logger = logging.getLogger("spider.views")
+        self.logger.debug("ManagementArea {}".format(self._cp_config))
 
     @cherrypy.expose
     @require()
