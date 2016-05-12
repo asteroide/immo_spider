@@ -1,0 +1,32 @@
+logging:
+  version: 1
+
+  formatters:
+    brief:
+      format: "%(levelname)s %(name)s %(message)-30s"
+    custom:
+      format: "%(asctime)-15s %(levelname)s %(name)s %(message)s"
+
+  handlers:
+    console:
+      class : logging.StreamHandler
+      formatter: brief
+      level   : INFO
+      stream  : ext://sys.stdout
+    file:
+      class : logging.handlers.RotatingFileHandler
+      formatter: custom
+      level   : DEBUG
+      filename: logconfig.log
+      maxBytes: 1048576
+      backupCount: 3
+
+  loggers:
+    spider:
+      level: DEBUG
+      handlers: [console, file]
+      propagate: no
+
+  root:
+    level: INFO
+    handlers: [console]

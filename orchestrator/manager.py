@@ -1,7 +1,9 @@
 import cherrypy
 import logging
+import logging.config
 import os
 import sys
+import yaml
 from api.main import API
 from views.main import Views, ManagementArea
 from auth import AuthController
@@ -9,12 +11,15 @@ import threading
 import time
 from requests.exceptions import ConnectionError
 
-FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
-logging.basicConfig(
-    format=FORMAT,
-    level=logging.DEBUG)
+global_config = yaml.load(open("conf.yaml"))
 
-logger = logging.getLogger("orchestrator")
+logging.config.dictConfig(global_config['logging'])
+# FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
+# logging.basicConfig(
+#     format=FORMAT,
+#     level=logging.DEBUG)
+
+logger = logging.getLogger("spider")
 
 
 api = API()
@@ -73,7 +78,8 @@ cherrypy.tree.mount(manager_area, "/manage", config=os.path.join(os.getcwd(), "m
 cherrypy.tree.mount(auth, "/auth", config=os.path.join(os.getcwd(), "main.conf"))
 # cherrypy.engine.signal_handler.subscribe()
 cherrypy.engine.signal_handler.set_handler('SIGINT', watchdog.stop)
-logger.info("handlers = {}".format(cherrypy.engine.signal_handler.handlers))
+logger.debug("handlers = {}".format(cherrypy.engine.signal_handler.handlers))
+logger.info("Starting server...")
 
 try:
     cherrypy.engine.start()
