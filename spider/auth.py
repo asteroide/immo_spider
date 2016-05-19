@@ -5,15 +5,22 @@
 # from http://tools.cherrypy.org/wiki/AuthenticationAndAccessRestrictions
 
 import cherrypy
+import yaml
+import logging
 from html import escape
 from jinja2 import Environment, FileSystemLoader
 import urllib.parse
 import hashlib
-from plugins.save import mongo_driver
-from plugins.save.mongo_driver import DBDriver
+from spider.plugins.save import mongo_driver
+from spider.plugins.save.mongo_driver import DBDriver
 
 SESSION_KEY = '_cp_username'
-env = Environment(loader=FileSystemLoader('templates'))
+
+global_config = yaml.load(open("/vagrant/conf/conf.yaml"))
+
+env = Environment(loader=FileSystemLoader(global_config["main"]["templates"]))
+
+logger = logging.getLogger("spider.auth")
 
 
 def check_credentials(username, password):
@@ -27,18 +34,10 @@ def check_credentials(username, password):
     else:
         return u"Incorrect username or password."
 
-    # TODO: implement with MongoDB ans sha256.hexdigest
-    # An example implementation which uses an ORM could be:
-    # u = User.get(username)
-    # if u is None:
-    #     return u"Username %s is unknown to me." % username
-    # if u.password != md5.new(password).hexdigest():
-    #     return u"Incorrect password"
-
 
 def check_auth(*args, **kwargs):
     """A tool that looks in config for 'auth.require'. If found and it
-    is not None, a login is required and the entry is evaluated as alist of
+    is not None, a login is required and the entry is evaluated as a list of
     conditions that the user must fulfill"""
     conditions = cherrypy.request.config.get('auth.require', None)
     # format GET params
@@ -48,13 +47,13 @@ def check_auth(*args, **kwargs):
         if username:
             cherrypy.request.login = username
             for condition in conditions:
-                # A condition is just a callable that returns true orfalse
+                # A condition is just a callable that returns true or false
                 if not condition():
                     # Send old page as from_page parameter
                     raise cherrypy.HTTPRedirect("/auth/login?from_page=%s" % get_parmas)
         else:
             # Send old page as from_page parameter
-            raise cherrypy.HTTPRedirect("/auth/login?from_page=%s" %get_parmas)
+            raise cherrypy.HTTPRedirect("/auth/login?from_page=%s" % get_parmas)
 
 cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
 
@@ -86,8 +85,8 @@ def member_of(groupname):
     return check
 
 
-def name_is(reqd_username):
-    return lambda: reqd_username == cherrypy.request.login
+def name_is(read_username):
+    return lambda: read_username == cherrypy.request.login
 
 # These might be handy
 

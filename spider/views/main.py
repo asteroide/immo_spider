@@ -1,10 +1,13 @@
 import cherrypy
 import logging
+import yaml
 from jinja2 import Environment, FileSystemLoader
-from auth import require, AuthController, member_of
-from plugins.save.mongo_driver import DBDriver
+from spider.auth import require, AuthController, member_of
+from spider.plugins.save.mongo_driver import DBDriver
 
-env = Environment(loader=FileSystemLoader('templates'))
+global_config = yaml.load(open("/vagrant/conf/conf.yaml"))
+
+env = Environment(loader=FileSystemLoader(global_config["main"]["templates"]))
 
 
 class Views(object):
@@ -20,7 +23,7 @@ class Views(object):
         self.logger.debug("Views {}".format(self._cp_config))
 
     @cherrypy.expose
-    @require()
+    # @require()
     def index(self):
         tmpl = env.get_template('main.html')
         return tmpl.render()
@@ -42,7 +45,7 @@ class ManagementArea(object):
         self.logger.debug("ManagementArea {}".format(self._cp_config))
 
     @cherrypy.expose
-    @require()
+    # @require()
     def index(self, username=None, password1=None, password2=None, check=None):
         if cherrypy.request.method == "POST":
             if username and password1 and password2 and password1 == password2:
