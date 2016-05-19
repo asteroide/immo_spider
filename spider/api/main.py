@@ -3,14 +3,15 @@ import logging
 import socket
 import requests
 import configparser
-from auth import AuthController, require
+import hashlib
 from cherrypy import tools
-from plugins import import_plugin
 from geopy.geocoders import Nominatim
 from geojson import Feature, Point, FeatureCollection
 from geopy.exc import GeocoderTimedOut
-from plugins.save.mongo_driver import DBDriver
-import hashlib
+from spider.auth import AuthController, require
+from spider.plugins import import_plugin
+from spider.plugins.save.mongo_driver import DBDriver
+from spider import __version__
 
 price_colors = (
     # (color, min, max)
@@ -34,10 +35,8 @@ class API(object):
     def __init__(self):
         self.geolocator = Nominatim()
         self.db_driver = DBDriver()
-        self.logger = logging.getLogger("spider.server")
+        self.logger = logging.getLogger("spider.api")
         self.plugins = import_plugin()
-        self.config = configparser.ConfigParser()
-        self.config.read('../main.py')
 
     def __get_geocode(self, address):
         _location = None
@@ -70,7 +69,7 @@ class API(object):
     @cherrypy.expose
     @tools.json_out()
     def index(self):
-        return {"version": self.config['global']['version'], "tree": ["/", "/data"]}
+        return {"version": __version__, "tree": ["/", "/data", "/features"]}
 
     @cherrypy.expose
     @tools.json_out()
@@ -123,6 +122,7 @@ class API(object):
         for _plug_name, _plugin in self.plugins.items():
             try:
                 _ads = _plugin.__driver__.compute()
+                self.logger.info('Trying to open plugin {}'.format(_plug_name))
                 for _ad in _ads:
                     _ad['feature'] = self.__get_geocode(_ad['address'])
                     if self.db_driver.insert(_ad):

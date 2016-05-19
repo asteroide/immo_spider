@@ -23,8 +23,10 @@ data = {
 
 import logging
 import hashlib
+import shelve
+import time
 from pymongo import MongoClient
-from exceptions import AuthException
+from spider.exceptions import AuthException
 
 logger = logging.getLogger("spider.save")
 

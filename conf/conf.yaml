@@ -1,3 +1,7 @@
+main:
+  templates: "/vagrant/spider/templates"
+  plugins: "/vagrant/spider/plugins"
+
 logging:
   version: 1
 
