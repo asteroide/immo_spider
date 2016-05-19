@@ -73,7 +73,7 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
-    @require()
+    # @require()
     def data(self, geoid=None, uuid=None, action=None):
         # cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
         self.logger.debug("Calling data with {} {} {}".format(geoid, uuid, action))
@@ -95,7 +95,7 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
-    @require()
+    # @require()
     def features(self, choice=None):
         # cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
         features = list()
@@ -115,7 +115,7 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
-    @require()
+    # @require()
     def sync(self):
         # cherrypy.response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:4000"
         ads = []
@@ -136,14 +136,14 @@ class API(object):
 
     @cherrypy.expose
     @tools.json_out()
-    @require()
+    # @require()
     def purge(self):
         delete_count = self.db_driver.purge()
         return {"action": "purge", "number": delete_count}
 
     @cherrypy.expose
     @tools.json_out()
-    @require()
+    # @require()
     def check(self):
         _items = self.db_driver.get()
         results = []
