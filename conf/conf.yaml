@@ -17,16 +17,16 @@ logging:
       class : logging.handlers.RotatingFileHandler
       formatter: custom
       level   : DEBUG
-      filename: logconfig.log
+      filename: /tmp/logconfig.log
       maxBytes: 1048576
       backupCount: 3
 
   loggers:
     spider:
       level: DEBUG
-      handlers: [console, file]
+      handlers: [file]
       propagate: no
 
   root:
     level: INFO
-    handlers: [console]
+    handlers: [file]
