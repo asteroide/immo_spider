@@ -49,3 +49,20 @@ Listen 0.0.0.0:80
 EOF
 
 sudo service apache2 restart
+
+# part for micro services and lxc
+
+sudo apt-get install lxc
+
+sudo -E lxc-create -t download -n rabbitmq -- --dist ubuntu --release xenial --arch amd64
+sudo -E lxc-create -t download -n spider -- --dist ubuntu --release xenial --arch amd64
+sudo -E lxc-create -t download -n apiviewer -- --dist ubuntu --release xenial --arch amd64
+sudo -E lxc-create -t download -n logger -- --dist ubuntu --release xenial --arch amd64
+
+sudo lxc-start -n rabbitmq
+sudo lxc-start -n spider
+sudo lxc-start -n apiviewer
+sudo lxc-start -n logger
+
+sudo lxc-execute  -n rabbitmq -- apt-get update
+sudo lxc-execute  -n rabbitmq -- apt-get install rabbitmq-server
