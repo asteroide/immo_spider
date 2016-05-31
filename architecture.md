@@ -1,9 +1,11 @@
 SOFTWARE ARCHITECTURE
 
-             [i1]           [i2]        /-- Javascript Viewer
-    Spider --------\   /---------- APIViewer 
-                RabbitMQServer          \-- GTK Viewer
-                 / [i3]     \ [i4] 
+                                         -- Javascript Viewer
+             [i1]           [i2]        /
+    Spider ---------    ---------- APIViewer 
+                    \  /                \
+                RabbitMQServer           -- GTK Viewer
+                 / [i3]     \ [i4]       
              DBDriver       Log
                 |           |  \
                 DB        File Syslog ...
