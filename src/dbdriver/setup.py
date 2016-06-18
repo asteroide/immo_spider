@@ -34,4 +34,10 @@ setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)"
     ],
 
+    entry_points={
+        'console_scripts': [
+            'spider_db = dbdriver.controller:main',
+        ],
+    },
+
 )
