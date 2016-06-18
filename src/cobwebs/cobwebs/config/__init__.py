@@ -1,0 +1,1 @@
+from cobwebs.config.core import *  # noqa
