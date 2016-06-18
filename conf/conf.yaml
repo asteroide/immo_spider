@@ -1,6 +1,8 @@
 main:
   templates: "/vagrant/spider/templates"
-  plugins: "/vagrant/spider/plugins"
+  plugins: "/opt/spider/src/spider/spider/plugins/"
+  mq_driver: cobwebs.mq.backends.rabbitmq
+  mq_host: localhost
 
 logging:
   version: 1
