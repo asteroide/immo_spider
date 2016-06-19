@@ -1,5 +1,5 @@
 main:
-  templates: "/vagrant/spider/templates"
+  templates: "/opt/spider/src/apiviewer/static/templates/"
   plugins: "/opt/spider/src/spider/spider/plugins/"
   mq_driver: cobwebs.mq.backends.rabbitmq
   mq_host: localhost
