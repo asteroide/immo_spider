@@ -1,0 +1,38 @@
+.area {
+    background: #9f9f9f;
+    width: 70%;
+    padding: 1em;
+    margin: 1em;
+    border-radius: 10px;
+}
+
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+    padding: 0.3em;
+
+    text-decoration: none;
+    color: initial;
+}
+
+#action-panel {
+    display: none;
+    width: 1000px;
+    padding: 5px;
+    position: absolute;
+    z-index: 10;
+}
+
+#action-info{
+    display: none;
+    padding: 0.7em;
+    margin-top: 1em;
+    color: #3a2201;
+    border-style: solid;
+    border-color: #ff9703;
+}
+
+.right {
+    float: right;
+}
