@@ -2,3 +2,4 @@ pika
 lxml
 geojson
 geopy
+requests
