@@ -4,7 +4,7 @@ import glob
 import importlib.machinery
 
 
-def get_config(confname="main", confdir="."):
+def get_config(confname="main.conf", confdir="."):
     """Try to retrieve the best configuration file
 
     :param confname: name of the configuration file
@@ -13,11 +13,13 @@ def get_config(confname="main", confdir="."):
     """
     _global_config = {}
     for filename in (
-        os.path.join(os.getcwd(), ".{}.conf".format(confname)),
-        os.path.join(os.getenv("HOME", "/tmp"), ".{}.conf".format(confname)),
-        "/etc/spider/{}/{}.conf".format(confdir, confname),
+        os.path.join(os.getcwd(), ".{}".format(confname)),
+        os.path.join(os.getenv("HOME", "/tmp"), ".{}".format(confname)),
+        "/etc/spider/{}/{}".format(confdir, confname),
+        os.path.join(confdir, confname),
     ):
         try:
+            print(filename, _global_config)
             _global_config = yaml.load(open(filename))
         except FileNotFoundError:
             pass
