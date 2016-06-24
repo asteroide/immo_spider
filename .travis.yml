@@ -10,7 +10,7 @@ python:
 #  - "nightly" # currently points to 3.6-dev
 # command to install dependencies
 install:
-  - "pip install nosetests"
+  - "pip install nose"
   - "cd src/cobwebs; pip install -r requirements.txt; pip install .; cd -"
   - "cd src/dbdriver; pip install -r requirements.txt; pip install .; cd -"
   - "cd src/apiviewer; pip install -r requirements.txt; pip install .; cd -"
