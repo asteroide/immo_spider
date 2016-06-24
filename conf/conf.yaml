@@ -1,6 +1,6 @@
 main:
-  templates: "/opt/spider/src/apiviewer/static/templates/"
-  plugins: "/opt/spider/src/spider/spider/plugins/"
+  templates: "src/apiviewer/static/templates/"
+  plugins: "src/spider/spider/plugins/"
   mq_driver: cobwebs.mq.backends.rabbitmq
   mq_host: localhost
 
