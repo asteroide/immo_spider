@@ -19,7 +19,6 @@ def get_config(confname="main.conf", confdir="."):
         os.path.join(confdir, confname),
     ):
         try:
-            print(filename, _global_config)
             _global_config = yaml.load(open(filename))
         except FileNotFoundError:
             pass
@@ -28,11 +27,13 @@ def get_config(confname="main.conf", confdir="."):
     return _global_config
 
 
-def import_plugin():
+def import_plugin(global_config=None):
+    if not global_config:
+        global_config = get_config()
     plugins = {}
     plugin_list = glob.glob(
         os.path.join(
-            get_config()["main"]["plugins"],
+            global_config["main"]["plugins"],
             "*.py"
         )
     )

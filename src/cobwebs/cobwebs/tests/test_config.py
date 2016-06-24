@@ -12,5 +12,6 @@ def test_get_config():
 
 
 def test_import_plugin():
-    plugins = import_plugin()
+    global_config = get_config(confname="conf.yaml", confdir="conf")
+    plugins = import_plugin(global_config)
     assert isinstance(plugins, tuple)
