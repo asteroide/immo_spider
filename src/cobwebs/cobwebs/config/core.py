@@ -4,7 +4,7 @@ import glob
 import importlib.machinery
 
 
-def get_config(confname="main", confdir=""):
+def get_config(confname="main", confdir="."):
     """Try to retrieve the best configuration file
 
     :param confname: name of the configuration file
@@ -22,7 +22,7 @@ def get_config(confname="main", confdir=""):
         except FileNotFoundError:
             pass
     if not _global_config:
-        raise BaseException("Could not find a usable configuration file")
+        raise BaseException("Could not find a usable configuration file {}/{}".format(confdir, confname))
     return _global_config
 
 
