@@ -1,4 +1,4 @@
-nguage: python
+language: python
 python:
   - "3.2"
   - "3.3"
@@ -8,10 +8,10 @@ python:
 #  - "nightly" # currently points to 3.6-dev
 # command to install dependencies
 install:
-  - "pip install --user nose"
+  - "pip install pytest"
   - "cd src/cobwebs; pip install --user -r requirements.txt; pip install --user .; cd -"
   - "cd src/dbdriver; pip install --user -r requirements.txt; pip install --user .; cd -"
   - "cd src/apiviewer; pip install --user -r requirements.txt; pip install --user .; cd -"
   - "cd src/spider; pip install --user -r requirements.txt; pip install --user .; cd -"
 # command to run tests
-script: nosetests
+script: py.test
