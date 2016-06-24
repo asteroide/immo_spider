@@ -9,11 +9,6 @@ from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 from cobwebs.config import get_config, import_plugin
 
-global_config = get_config()
-
-driver_module = importlib.import_module(global_config['main']['mq_driver'])
-mq_driver = driver_module.driver
-
 # data_test = {
 #     "action": "add",
 #     "data": {
@@ -28,15 +23,15 @@ mq_driver = driver_module.driver
 #         "extra": {}
 #     }
 # }
-#
-# data = mq_driver.rpc.send("db_driver", json.dumps(data_test), global_config['main']['mq_host'])
-#
-# print(data)
 
 
 class Spider:
 
     def __init__(self):
+        self.global_config = get_config()
+        driver_module = importlib.import_module(self.global_config['main']['mq_driver'])
+        self.mq_driver = driver_module.driver
+
         self.geolocator = Nominatim()
         self.plugins = import_plugin()
         self.logger = logging.getLogger("spider.api")
@@ -69,7 +64,7 @@ class Spider:
                 for _ad in _ads:
                     _ad['feature'] = self.__get_geocode(_ad['address'])
                     request = {"action": "add", "data": _ad}
-                    data = mq_driver.rpc.send("db_driver", json.dumps(request), global_config['main']['mq_host'])
+                    data = mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
                     if data:
                         print("sync {}".format(_ad['address']))
                         ads.append(_ad)
@@ -83,13 +78,13 @@ class Spider:
     def get(self, uuids):
         if not uuids:
             request = {"action": "list", "data": uuids}
-            data = mq_driver.rpc.send("db_driver", json.dumps(request), global_config['main']['mq_host'])
+            data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
             for _data in data:
                 yield _data
         else:
             for uuid in uuids:
                 request = {"action": "get", "data": {"uuid": uuid}}
-                data = mq_driver.rpc.send("db_driver", json.dumps(request), global_config['main']['mq_host'])
+                data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
                 yield data
 
 
