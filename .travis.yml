@@ -16,4 +16,4 @@ install:
 # command to run tests
 script:
   - py.test
-  - bandit -r .
+  - bandit -r src
