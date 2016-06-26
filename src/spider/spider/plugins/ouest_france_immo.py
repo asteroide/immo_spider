@@ -1,4 +1,4 @@
-from lxml import html
+from lxml import html  # nosec
 from io import StringIO
 import requests
 import logging
@@ -45,7 +45,7 @@ class ofi(object):
 
     def compute_ad(self, url):
         url = "https://www.ouestfrance-immo.com" + url
-        xml_str = StringIO(requests.get(url, verify=False).text)
+        xml_str = StringIO(requests.get(url, verify=True).text)
         tree = html.parse(xml_str)
         description = " ".join(tree.xpath('/html/body/div/section/div/div/div[@class=\'txtAnn\']/text()'))
         _id = hashlib.sha512(description.encode('utf-8')).hexdigest()
@@ -76,7 +76,7 @@ class ofi(object):
     def compute(self):
         ads = []
         for url in __urls__:
-            xml_str = StringIO(requests.get(url, verify=False).text)
+            xml_str = StringIO(requests.get(url, verify=True).text)
 
             tree = html.parse(xml_str)
 

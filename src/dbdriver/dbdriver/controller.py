@@ -140,7 +140,7 @@ class Router:
 
     def check_auth(self, username, password):
         user = self.spider_db.auth.find_one({'username': username})
-        if user and password == user['password']:
+        if user and password == user['password']:  # nosec (not a hardcoded password)
             return True
         raise AuthException()
 
@@ -148,7 +148,7 @@ class Router:
         users = self.spider_db.auth.find()
         result = []
         for user in users:
-            user.pop("password")
+            user.pop("password")  # nosec (not a hardcoded password)
             user.pop("_id")
             result.append(user)
         return result
@@ -156,7 +156,7 @@ class Router:
     def add_user(self, username, password):
         user = {
             'username': username,
-            'password': hashlib.sha256(password.encode("utf-8")).hexdigest(),
+            'password': hashlib.sha256(password.encode("utf-8")).hexdigest(),  # nosec (not a hardcoded password)
             'role': [],
         }
         self.spider_db.auth.insert_one(user)
@@ -164,7 +164,7 @@ class Router:
 
     def del_user(self, usernames):
         for username in usernames:
-            if username != 'admin':
+            if username != 'admin':  # nosec (not a hardcoded password)
                 result = self.spider_db.auth.delete_one({'username': username})
                 print(username, result.deleted_count)
 

@@ -2,6 +2,9 @@ import os
 import yaml
 import glob
 import importlib.machinery
+import logging
+
+logger = logging.getLogger("spider.cobwebs")
 
 
 def get_config(confname="main.conf", confdir="."):
@@ -14,14 +17,14 @@ def get_config(confname="main.conf", confdir="."):
     _global_config = {}
     for filename in (
         os.path.join(os.getcwd(), ".{}".format(confname)),
-        os.path.join(os.getenv("HOME", "/tmp"), ".{}".format(confname)),
+        os.path.join(os.getenv("HOME", "/tmp"), ".{}".format(confname)),  # nosec
         "/etc/spider/{}/{}".format(confdir, confname),
         os.path.join(confdir, confname),
     ):
         try:
-            _global_config = yaml.load(open(filename))
+            _global_config = yaml.safe_load(open(filename))
         except FileNotFoundError:
-            pass
+            logger.warn("Config file not found")
     if not _global_config:
         raise BaseException("Could not find a usable configuration file {}/{}".format(confdir, confname))
     return _global_config

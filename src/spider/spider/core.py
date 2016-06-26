@@ -64,7 +64,7 @@ class Spider:
                 for _ad in _ads:
                     _ad['feature'] = self.__get_geocode(_ad['address'])
                     request = {"action": "add", "data": _ad}
-                    data = mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
+                    data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
                     if data:
                         print("sync {}".format(_ad['address']))
                         ads.append(_ad)

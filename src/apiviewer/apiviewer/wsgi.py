@@ -27,7 +27,7 @@ class Root(Resource):
         tree = {}
         for co in class_objects:
             url = "/" + co.__name__.lower()
-            if co.__name__.lower() == "root":
+            if co.__name__.lower() == "root":  # nosec (not a hardcoded password)
                 url = "/"
             tree[url] = {}
             tree[url]["methods"] = list(filter(lambda x: x in dir(co), methods))
@@ -90,7 +90,7 @@ api.add_resource(Features, '/features')
 
 
 def main():
-    app.run(debug=True, host="0.0.0.0", port=4000)
+    app.run(debug=True, host="0.0.0.0", port=4000)  # nosec
 
 if __name__ == '__main__':
     main()
