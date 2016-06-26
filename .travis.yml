@@ -16,4 +16,4 @@ install:
 # command to run tests
 script:
   - py.test
-  - bandit -r src
+  - bandit -r src/apiviewer/apiviewer src/dbdriver/dbdriver src/spider/spider src/cobwebs/cobwebs
