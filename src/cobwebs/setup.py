@@ -2,7 +2,6 @@ import sys
 import shutil
 import os
 from setuptools import setup, find_packages
-import cobwebs
 import subprocess
 
 
@@ -16,6 +15,9 @@ if len(sys.argv) > 0:
         ret = shutil.copy("conf/cobwebs.yaml", "/etc/spider/cobwebs.yaml")
         print(ret)
         subprocess.call(["ls", "-l", "/etc/spider"])
+
+
+import cobwebs
 
 
 setup(
