@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("spider.cobwebs")
 
 
-def get_config(confname="cobwebs.yaml", confdir="/etc/spider"):
+def get_config(confname="cobwebs.yaml", confdir=None):
     """Try to retrieve the best configuration file
 
     :param confname: name of the configuration file
@@ -16,6 +16,7 @@ def get_config(confname="cobwebs.yaml", confdir="/etc/spider"):
     """
     _global_config = {}
     for filename in (
+        confname,
         os.path.join(os.getcwd(), ".{}".format(confname)),
         os.path.join(os.getenv("HOME", "/tmp"), ".{}".format(confname)),  # nosec
         "/etc/spider/{0}/{1}".format(confdir, confname),
