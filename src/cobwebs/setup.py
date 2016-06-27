@@ -17,6 +17,15 @@ if len(sys.argv) > 0:
         print(ret)
         subprocess.call(["ls", "-l", "/etc/spider"])
 
+
+if len(sys.argv) > 0:
+    if sys.argv[1] in ("install", "develop"):
+        try:
+            os.mkdir("/etc/spider/")
+        except FileExistsError:
+            print("Warning: /etc/spider directory already exists...")
+        shutil.copy("conf/cobwebs.yaml", "/etc/spider/cobwebs.yaml")
+
 setup(
 
     name='cobwebs',
