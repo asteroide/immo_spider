@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("spider.cobwebs")
 
 
-def get_config(confname="main.conf", confdir="."):
+def get_config(confname="cobwebs.yaml", confdir="."):
     """Try to retrieve the best configuration file
 
     :param confname: name of the configuration file
@@ -24,7 +24,7 @@ def get_config(confname="main.conf", confdir="."):
         try:
             _global_config = yaml.safe_load(open(filename))
         except FileNotFoundError:
-            logger.warn("Config file not found")
+            continue
     if not _global_config:
         raise BaseException("Could not find a usable configuration file {}/{}".format(confdir, confname))
     return _global_config

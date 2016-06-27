@@ -1,3 +1,6 @@
+import sys
+import shutil
+import os
 from setuptools import setup, find_packages
 import cobwebs
 
@@ -35,3 +38,11 @@ setup(
     ],
 
 )
+
+if len(sys.argv) > 0:
+    if sys.argv[1] in ("install", "develop"):
+        try:
+            os.mkdir("/etc/spider/")
+        except FileExistsError:
+            print("Warning: /etc/spider directory already exists...")
+        shutil.copy("conf/cobwebs.yaml", "/etc/spider/cobwebs.yaml")
