@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("spider.cobwebs")
 
 
-def get_config(confname="cobwebs.yaml", confdir=None):
+def get_config(confname="main.yaml", confdir=None):
     """Try to retrieve the best configuration file
 
     :param confname: name of the configuration file

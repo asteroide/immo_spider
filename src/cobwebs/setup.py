@@ -2,25 +2,17 @@ import sys
 import shutil
 import os
 from setuptools import setup, find_packages
-import subprocess
 
-CONF = os.getenv("SPIDER_CONF", "/etc/spider/cobwebs.yaml")
+CONF = os.getenv("SPIDER_CONF", "/etc/spider/main.yaml")
 
-import glob
-
-print(glob.glob("/tmp/*"))
-print(sys.argv)
-print("####################")
 if len(sys.argv) > 0:
     if sys.argv[1] in ("install", "develop"):
         try:
-            os.mkdir("/etc/spider/")
+            os.mkdir(os.path.dirname(CONF))
         except FileExistsError:
-            print("Warning: /etc/spider directory already exists...")
+            print("Warning: {} directory already exists...".format(os.path.dirname(CONF)))
         print("Copying file to " + CONF)
-        ret = shutil.copy("conf/cobwebs.yaml", CONF)
-        print(ret)
-        subprocess.call(["ls", "-l", "/etc/spider"])
+        shutil.copy("conf/cobwebs.yaml", CONF)
 
 
 import cobwebs
