@@ -6,6 +6,9 @@ import subprocess
 
 CONF = os.getenv("SPIDER_CONF", "/etc/spider/cobwebs.yaml")
 
+import glob
+
+print(glob.glob("/tmp/*"))
 if len(sys.argv) > 0:
     if sys.argv[1] in ("install", "develop"):
         try:
