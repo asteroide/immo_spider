@@ -22,6 +22,7 @@ data = {
 }
 """
 
+import logging
 import importlib
 import hashlib
 from pymongo import MongoClient
@@ -39,6 +40,7 @@ class Router:
         self.spider_db = self.client.spider
 
     def dispatch(self, ch, method, properties, request):
+        self.logger.info("dispatch {}".format(request))
         response = None
         if "action" in request:
             if request["action"] == "add":
@@ -101,6 +103,7 @@ class Router:
             :param geo_id: the GEOID of an ad
         :return: a list of features
         """
+        self.logger.debug("get {}".format(data))
         search = data["search"] if "search" in data else None
         uuid = data["uuid"] if "uuid" in data else None
         geo_id = data["geo_id"] if "geo_id" in data else None
@@ -175,7 +178,8 @@ def main():
     driver_module = importlib.import_module(global_config['main']['mq_driver'])
     mq_driver = driver_module.driver
 
-    router = Router(mq_driver.topics)
+    logger = logging.getLogger("spider.dbdriver")
+    router = Router(logger)
 
     mq_driver.rpc.run_server('db_driver', router.dispatch, global_config['main']['mq_host'])
 
