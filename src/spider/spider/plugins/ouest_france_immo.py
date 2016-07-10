@@ -16,32 +16,32 @@ __urls__ = [
 ]
 # https://www.ouestfrance-immo.com/acheter/maison/vannes-56-56000/?prix=50000_80000&surface=60_0&chambres=3_0
 
-return_exemple = [
-    {
-        'address': "",
-        "description": "",
-        "price": "",
-        "date": "",
-        "size": "",
-        "groundsurface": "",
-        "extra": {}
-    }
-]
+# return_exemple = [
+#     {
+#         'address': "",
+#         "description": "",
+#         "price": "",
+#         "date": "",
+#         "size": "",
+#         "groundsurface": "",
+#         "extra": {}
+#     }
+# ]
 
 
 class ofi(object):
 
-    data_template = {
-        "address": "",
-        "description": "",
-        "price": "",
-        "date": "",
-        "surface": "",
-        "groundsurface": "",
-        "url": [],
-        "photos": [],
-        "extra": {},
-    }
+    # data_template = {
+    #     "address": "",
+    #     "description": "",
+    #     "price": "",
+    #     "date": "",
+    #     "surface": "",
+    #     "groundsurface": "",
+    #     "url": [],
+    #     "photos": [],
+    #     "extra": {},
+    # }
 
     def compute_ad(self, url):
         url = "https://www.ouestfrance-immo.com" + url

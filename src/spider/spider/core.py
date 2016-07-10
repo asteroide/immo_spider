@@ -75,16 +75,15 @@ class Spider:
 
         return {"action": "sync", "number": len(ads), 'message': " ".join(map(lambda x: x['address'], ads))}
 
-    def get(self, uuids):
-        if not uuids:
-            request = {"action": "list", "data": uuids}
+    def get(self, req_data):
+        if not req_data:
+            request = {"action": "list", "data": None}
             data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
             for _data in data:
                 yield _data
         else:
-            for uuid in uuids:
-                request = {"action": "get", "data": {"uuid": uuid}}
-                data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
-                yield data
+            request = {"action": "get", "data": req_data}
+            data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
+            yield data
 
 

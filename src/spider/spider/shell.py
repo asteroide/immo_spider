@@ -20,9 +20,16 @@ def sync(*args):
     sp.sync()
 
 
-def get(*args):
+def get(args):
+    print("GET: {}".format(args))
+    conf_data = {}
+    for _data in args:
+        key, value = _data.split("=")
+        conf_data[key] = value
     sp = Spider()
-    for _data in sp.get(*args):
+    print("conf_data={}".format(conf_data))
+    for _data in sp.get(conf_data):
+        print(_data)
         if not _data["show"]:
             continue
         print("{address:<15} {price:<10} {url}".format(
