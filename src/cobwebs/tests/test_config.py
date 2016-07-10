@@ -5,10 +5,11 @@ from cobwebs.config import get_config, import_plugin
 import pytest
 
 
-@pytest.fixture(scope="session")
-def tmp_config_file(tmpdir_factory):
-    fn = tmpdir_factory.mktemp('data').join('conf.yaml')
-    open(str(fn), "w").write(str(config_test))
+@pytest.fixture
+def tmp_config_file(tmpdir):
+    fn = tmpdir.mkdir('data').join('conf.yaml')
+    fn.write(str(config_test))
+    print(fn)
     return str(fn)
 
 
@@ -67,5 +68,3 @@ logging:
     level: INFO
     handlers: [file]
 """
-
-#save_config_file()
