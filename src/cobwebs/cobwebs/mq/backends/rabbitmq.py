@@ -1,11 +1,16 @@
 import json
 import pika
 import uuid
+import logging
 from cobwebs.mq import Driver, RPCLink, TopicsLink
 
 
 class RPCRabbitMQ(RPCLink):
     key = None
+
+    def __init__(self):
+        self.logger = logging.getLogger("spider.RPCRabbitMQ")
+        super(RPCLink)
 
     def run_server(self, key, callback, endpoint="localhost"):
         connection = pika.BlockingConnection(pika.ConnectionParameters(
@@ -28,12 +33,13 @@ class RPCRabbitMQ(RPCLink):
         channel.basic_qos(prefetch_count=1)
         channel.basic_consume(on_request, queue=key)
 
-        print('Awaiting RPC requests')
+        self.logger.info('Awaiting RPC requests')
         channel.start_consuming()
 
     def send(self, key, data, endpoint):
         self.key = key
         self.__init_client(endpoint)
+        self.logger.debug('Sending {}'.format(data))
         return self.__call(data)
 
     def __init_client(self, endpoint):
@@ -71,14 +77,14 @@ class RPCRabbitMQ(RPCLink):
 class TopicsRabbitMQ(TopicsLink):
 
     def __init__(self):
+        self.logger = logging.getLogger("spider.TopicsRabbitMQ")
         self.binding_keys = list("#")
         self.endpoint = 'localhost'
         self.key = None
         self.routing_key = 'anonymous.info'
 
-    @staticmethod
-    def run_server(key, binding_keys=list("#"), callback=None, endpoint='localhost'):
-        print("TopicsRabbitMQ.run_server {} {} {} {}".format(key, binding_keys, callback, endpoint))
+    def run_server(self, key, binding_keys=list("#"), callback=None, endpoint='localhost'):
+        self.logger.info("run_server {} {} {} {}".format(key, binding_keys, callback, endpoint))
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=endpoint))
 
@@ -101,9 +107,8 @@ class TopicsRabbitMQ(TopicsLink):
 
         channel.start_consuming()
 
-    @staticmethod
-    def emit(key, message, routing_key='anonymous.info', endpoint='localhost'):
-        print("emit {} {} {} {}".format(key, message, routing_key, endpoint))
+    def emit(self, key, message, routing_key='anonymous.info', endpoint='localhost'):
+        self.logger.info("emit {} {} {} {}".format(key, message, routing_key, endpoint))
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=endpoint))
 
