@@ -48,7 +48,7 @@ class ofi(object):
         xml_str = StringIO(requests.get(url, verify=True).text)
         tree = html.parse(xml_str)
         description = " ".join(tree.xpath('/html/body/div/section/div/div/div[@class=\'txtAnn\']/text()'))
-        _id = hashlib.sha512(description.encode('utf-8')).hexdigest()
+        _id = hashlib.sha1(description.encode('utf-8')).hexdigest()
         price = " ".join(tree.xpath('/html/body/div/section/div/div/strong[@itemprop="price"]/text()'))
         price = price.replace('€', "").strip().replace(" ", "")
         address = "".join(tree.xpath('/html/body/div/section/div/div/h2[@id="caractDetail"]/text()')).replace("Vente maison", "").strip()
