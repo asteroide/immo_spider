@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import click
 from spider import Spider
 import cobwebs
 
@@ -8,61 +9,114 @@ import cobwebs
 logger = cobwebs.getLogger("spider.api")
 
 
-def help(*args):
-    print("""{}
+# def help(*args):
+#     print("""{}
+#
+#     Commands:
+#         sync
+#         get [filter=...] [uuid=...] [geo_ip=...]
+#         purge
+#         help
+#     """.format(sys.argv[0]))
 
-    Commands:
-        sync
-        get [filter=...] [uuid=...] [geo_ip=...]
-        purge
-        help
-    """.format(sys.argv[0]))
+
+@click.group()
+def cli():
+    pass
 
 
-def sync(*args):
+@click.command()
+def sync():
     logger.info("Syncing...")
     sp = Spider()
     sp.sync()
 
 
-def purge(*args):
+@click.command()
+def purge():
     logger.info("Purging...")
     sp = Spider()
     data = sp.purge()
     print(data)
 
 
-def __show(filter_str, data):
+def __show(filter_str, price=None, garden=None, surface=None, id=None, data=None):
+    if price == None and garden == None and surface == None and id == None:
+        return True
     if not data["show"]:
         return False
     if filter_str:
-        print("if filter_str")
         for _filter_str in filter_str.split(","):
             if _filter_str in data["address"]:
-                return True
+                break
             if _filter_str in data["description"]:
-                return True
+                break
             if _filter_str in data["id"]:
-                return True
+                break
         return False
-    return True
+    if garden == True and "groundsurface" in data:
+        if len(data["groundsurface"]) > 0:
+            return True
+    elif garden == False and "groundsurface" in data:
+        if len(data["groundsurface"]) == 0:
+            return True
+    if price and "price" in data and int(data['price']) > 0:
+        _prices = []
+        if ":" in price:
+            _p = price.split(':')
+            if "%" in _p[1]:
+                _percent = int(_p[1].replace("%", ""))
+                _prices = [int(_p[0]) * (1-_percent/100), int(_p[0]) * (1+_percent/100)]
+            else:
+                _prices = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+        else:
+            _prices = [int(price), int(price)]
+        if _prices[0] < int(data['price']) < _prices[1]:
+            return True
+    try:
+        _surface = int(data['surface'].replace("m²", ""))
+    except ValueError:
+        _surface = 0
+    if surface and "surface" in data and _surface > 0:
+        _surfaces = []
+        if ":" in surface:
+            _p = surface.split(':')
+            if "%" in _p[1]:
+                _percent = int(_p[1].replace("%", ""))
+                _surfaces = [int(_p[0]) * (1-_percent/100), int(_p[0]) * (1+_percent/100)]
+            else:
+                _surfaces = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+        else:
+            _surfaces = [int(surface), int(surface)]
+        if _surfaces[0] < _surface < _surfaces[1]:
+            return True
+    if id == data["id"]:
+        return True
+    return False
 
 
-def get(args):
+@click.command()
+@click.option('--verbose', '-v', default=False, is_flag=True, help='Set verbosity.')
+@click.option('--filter', '-f', help='Filter to apply.')
+@click.option('--price', '-p', help='Filter on price (ex: 100000:5%).')
+@click.option('--garden/--no-garden', help='Filter on the presence of a garden.', default=None)
+@click.option('--surface', '-s', help='Filter on surface (ex: 100:5%)')
+@click.option('--id', '-i', help='Filter on ID')
+def get(verbose=False, filter="", price=None, garden=None, surface=None, id=None):
     # print("GET: {}".format(args))
-    conf_data = {}
-    verbose = False
-    for _data in args:
-        if _data in ("-v", "--verbose"):
-            verbose = True
-            continue
-        key, value = _data.split("=")
-        conf_data[key] = value
+    # conf_data = {}
+    # verbose = False
+    # for _data in args:
+    #     if _data in ("-v", "--verbose"):
+    #         verbose = True
+    #         continue
+    #     key, value = _data.split("=")
+    #     conf_data[key] = value
     sp = Spider()
-    logger.debug("conf_data={}".format(conf_data))
-    _filter = conf_data["filter"] if "filter" in conf_data else None
-    for _data in sp.get(conf_data):
-        if not __show(_filter, _data):
+    # logger.debug("conf_data={}".format(conf_data))
+    # _filter = conf_data["filter"] if "filter" in conf_data else None
+    for _data in sp.get():
+        if not __show(filter, price, garden, surface, id, _data):
             continue
         # if not _data["show"]:
         #     continue
@@ -99,16 +153,20 @@ commands = (help, sync, get, purge)
 
 
 def main():
-    if len(sys.argv) == 1:
-        help()
-        sys.exit(0)
-    else:
-        for _command in commands:
-            if _command.__name__ == sys.argv[1].lower():
-                _command(sys.argv[2:])
-                break
-        else:
-            print("command not found")
+    cli.add_command(sync)
+    cli.add_command(purge)
+    cli.add_command(get)
+    cli()
+    # if len(sys.argv) == 1:
+    #     help()
+    #     sys.exit(0)
+    # else:
+    #     for _command in commands:
+    #         if _command.__name__ == sys.argv[1].lower():
+    #             _command(sys.argv[2:])
+    #             break
+    #     else:
+    #         print("command not found")
 
 
 if __name__ == "__main__":
