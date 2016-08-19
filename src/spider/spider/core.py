@@ -2,11 +2,11 @@
 
 import json
 import importlib
-import logging
 import socket
 from geojson import Feature, Point, FeatureCollection
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
+import cobwebs
 from cobwebs.config import get_config, import_plugin
 
 # data_test = {
@@ -34,7 +34,6 @@ class Spider:
 
         self.geolocator = Nominatim()
         self.plugins = import_plugin()
-        self.logger = logging.getLogger("spider.api")
 
     def __get_geocode(self, address):
         _location = None
@@ -60,11 +59,12 @@ class Spider:
         for _plug_name, _plugin in self.plugins.items():
             try:
                 _ads = _plugin.__driver__.compute()
-                # self.logger.info('Trying to open plugin {}'.format(_plug_name))
+                self.logger.info('Trying to open plugin {}'.format(_plug_name))
                 for _ad in _ads:
                     _ad['feature'] = self.__get_geocode(_ad['address'])
                     request = {"action": "add", "data": _ad}
-                    data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
+                    data = self.mq_driver.rpc.send("db_driver", json.dumps(request),
+                                                   self.global_config['main']['mq_host'])
                     if data:
                         print("sync {}".format(_ad['address']))
                         ads.append(_ad)
@@ -75,7 +75,7 @@ class Spider:
 
         return {"action": "sync", "number": len(ads), 'message': " ".join(map(lambda x: x['address'], ads))}
 
-    def get(self, req_data):
+    def get(self, req_data={}):
         if not req_data:
             request = {"action": "list", "data": None}
             data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
@@ -84,6 +84,13 @@ class Spider:
         else:
             request = {"action": "get", "data": req_data}
             data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
-            yield data
+            for _data in data:
+                yield _data
+
+    def purge(self):
+        request = {"action": "purge", "data": None}
+        data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
+        request['data'] = data
+        return request
 
 
