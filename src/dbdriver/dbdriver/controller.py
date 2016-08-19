@@ -35,12 +35,11 @@ config = get_config()
 class Router:
     def __init__(self, logger):
         self.logger = logger
-        # self.logger.emit('logger', "initialization of dbdriver", routing_key='anonymous.info', endpoint='localhost')
         self.client = MongoClient()
         self.spider_db = self.client.spider
 
     def dispatch(self, ch, method, properties, request):
-        self.logger.info("dispatch {}".format(request))
+        self.logger.debug("dispatch {}".format(request))
         response = None
         if "action" in request:
             if request["action"] == "add":
@@ -50,6 +49,8 @@ class Router:
                 response = self.delete(request["data"])
             elif request["action"] == "list":
                 response = self.list()
+            elif request["action"] == "purge":
+                response = self.purge()
             elif request["action"] == "get":
                 response = self.get(request["data"])
             else:
@@ -108,7 +109,7 @@ class Router:
         uuid = data["uuid"] if "uuid" in data else None
         geo_id = data["geo_id"] if "geo_id" in data else None
         result = []
-        # self.logger.debug("mongo.get geo_id={}".format(geo_id))
+        self.logger.debug("===> {} {} {}".format(search, geo_id, uuid))
         if search:
             return result.append(list(self.spider_db.features.find(search)))
         elif uuid:
@@ -137,7 +138,7 @@ class Router:
 
         :return: the number of deleted features
         """
-        # logger.info("Purging database")
+        self.logger.info("Purging database")
         result = self.spider_db.features.delete_many({})
         return result.deleted_count
 
