@@ -41,58 +41,71 @@ def purge():
 
 
 def __show(filter_str, price=None, garden=None, surface=None, id=None, data=None):
-    if price == None and garden == None and surface == None and id == None:
-        return True
     if not data["show"]:
         return False
+    if price:
+        if "price" in data and int(data['price']) > 0:
+            _prices = []
+            if ":" in price:
+                _p = price.split(':')
+                if "%" in _p[1]:
+                    _percent = int(_p[1].replace("%", ""))
+                    _prices = [int(_p[0]) * (1 - _percent / 100), int(_p[0]) * (1 + _percent / 100)]
+                else:
+                    _prices = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+            else:
+                _prices = [int(price), int(price)]
+            if _prices[0] > int(data['price']):
+                return False
+            if int(data['price']) > _prices[1]:
+                return False
     if filter_str:
+        filter_str = filter_str.lower()
+        result = []
         for _filter_str in filter_str.split(","):
-            if _filter_str in data["address"]:
-                break
-            if _filter_str in data["description"]:
-                break
-            if _filter_str in data["id"]:
-                break
+            if _filter_str in data["address"].lower():
+                result.append(True)
+                continue
+            if _filter_str in data["description"].lower():
+                result.append(True)
+                continue
+            if _filter_str in data["id"].lower():
+                result.append(True)
+                continue
+            result.append(False)
+        if True not in result:
+            return False
+    if garden is not None:
+        if garden == True and "groundsurface" in data:
+            if len(data["groundsurface"]) < 0:
+                return False
+        elif garden == False and "groundsurface" in data:
+            if len(data["groundsurface"]) != 0:
+                return False
+    if surface:
+        try:
+            _surface = int(data['surface'].replace("m²", ""))
+        except ValueError:
+            _surface = 0
+        if "surface" in data and _surface > 0:
+            _surfaces = []
+            if ":" in surface:
+                _p = surface.split(':')
+                if "%" in _p[1]:
+                    _percent = int(_p[1].replace("%", ""))
+                    _surfaces = [int(_p[0]) * (1 - _percent / 100),
+                                 int(_p[0]) * (1 + _percent / 100)]
+                else:
+                    _surfaces = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+            else:
+                _surfaces = [int(surface), int(surface)]
+            if _surfaces[0] > _surface:
+                return False
+            elif _surface > _surfaces[1]:
+                return False
+    if id and id != data["id"]:
         return False
-    if garden == True and "groundsurface" in data:
-        if len(data["groundsurface"]) > 0:
-            return True
-    elif garden == False and "groundsurface" in data:
-        if len(data["groundsurface"]) == 0:
-            return True
-    if price and "price" in data and int(data['price']) > 0:
-        _prices = []
-        if ":" in price:
-            _p = price.split(':')
-            if "%" in _p[1]:
-                _percent = int(_p[1].replace("%", ""))
-                _prices = [int(_p[0]) * (1-_percent/100), int(_p[0]) * (1+_percent/100)]
-            else:
-                _prices = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
-        else:
-            _prices = [int(price), int(price)]
-        if _prices[0] < int(data['price']) < _prices[1]:
-            return True
-    try:
-        _surface = int(data['surface'].replace("m²", ""))
-    except ValueError:
-        _surface = 0
-    if surface and "surface" in data and _surface > 0:
-        _surfaces = []
-        if ":" in surface:
-            _p = surface.split(':')
-            if "%" in _p[1]:
-                _percent = int(_p[1].replace("%", ""))
-                _surfaces = [int(_p[0]) * (1-_percent/100), int(_p[0]) * (1+_percent/100)]
-            else:
-                _surfaces = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
-        else:
-            _surfaces = [int(surface), int(surface)]
-        if _surfaces[0] < _surface < _surfaces[1]:
-            return True
-    if id == data["id"]:
-        return True
-    return False
+    return True
 
 
 @click.command()
