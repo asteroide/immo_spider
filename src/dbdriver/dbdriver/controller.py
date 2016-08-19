@@ -47,6 +47,8 @@ class Router:
                 # self.logger.emit('logger', "add action", routing_key='dbdriver.info', endpoint='localhost')
             elif request["action"] == "delete":
                 response = self.delete(request["data"])
+            elif request["action"] == "hide":
+                response = self.hide(request["data"])
             elif request["action"] == "list":
                 response = self.list()
             elif request["action"] == "purge":

@@ -95,7 +95,16 @@ class Spider:
 
     def delete(self, ids):
         request = {"action": "delete", "data": ids}
-        print("delete {}".format(ids))
+        request['data'] = dict()
+        for _id in ids:
+            _request = dict(request)
+            _request['data'] = _id
+            data = self.mq_driver.rpc.send("db_driver", json.dumps(_request), self.global_config['main']['mq_host'])
+            request['data'][_id] = data
+        return request
+
+    def hide(self, ids):
+        request = {"action": "hide", "data": ids}
         request['data'] = dict()
         for _id in ids:
             _request = dict(request)
