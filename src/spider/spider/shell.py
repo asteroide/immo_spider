@@ -40,6 +40,20 @@ def purge():
     print(data)
 
 
+@click.command()
+@click.argument("ids", nargs=-1)
+def delete(ids):
+    logger.info("Deleting...")
+    sp = Spider()
+    data = sp.delete(ids)
+    print("action: \033[1m{}\033[m".format(data["action"]))
+    for _key, _value in data["data"].items():
+        if _value:
+            print("{}: \033[32m{}\033[m".format(_key, _value))
+        else:
+            print("{}: \033[31m{}\033[m".format(_key, _value))
+
+
 def __show(filter_str, price=None, garden=None, surface=None, id=None, data=None):
     if not data["show"]:
         return False
@@ -169,6 +183,7 @@ def main():
     cli.add_command(sync)
     cli.add_command(purge)
     cli.add_command(get)
+    cli.add_command(delete)
     cli()
     # if len(sys.argv) == 1:
     #     help()
