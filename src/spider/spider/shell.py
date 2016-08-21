@@ -33,11 +33,22 @@ def sync():
 
 
 @click.command()
-def purge():
-    logger.info("Purging...")
-    sp = Spider()
-    data = sp.purge()
-    print(data)
+@click.option("--all", is_flag=True, default=False, help="Purge all database")
+def purge(all):
+    if all:
+        logger.info("Purging all...")
+        sp = Spider()
+        data = sp.purge()
+    else:
+        logger.info("Purging hidden articles...")
+        sp = Spider()
+        data = sp.purge(hidden=True)
+    print("action: \033[1m{}\033[m".format(data["action"]))
+    for _key, _value in data["data"].items():
+        if _value:
+            print("\t{}: \033[32m{}\033[m".format(_key, _value))
+        else:
+            print("\t{}: \033[31m{}\033[m".format(_key, _value))
 
 
 @click.command()
@@ -49,9 +60,9 @@ def delete(ids):
     print("action: \033[1m{}\033[m".format(data["action"]))
     for _key, _value in data["data"].items():
         if _value:
-            print("{}: \033[32m{}\033[m".format(_key, _value))
+            print("\t{}: \033[32m{}\033[m".format(_key, _value))
         else:
-            print("{}: \033[31m{}\033[m".format(_key, _value))
+            print("\t{}: \033[31m{}\033[m".format(_key, _value))
 
 
 @click.command()
@@ -63,9 +74,9 @@ def hide(ids):
     print("action: \033[1m{}\033[m".format(data["action"]))
     for _key, _value in data["data"].items():
         if _value:
-            print("{}: \033[32m{}\033[m".format(_key, _value))
+            print("\t{}: \033[32m{}\033[m".format(_key, _value))
         else:
-            print("{}: \033[31m{}\033[m".format(_key, _value))
+            print("\t{}: \033[31m{}\033[m".format(_key, _value))
 
 
 def __show(filter_str, price=None, garden=None, surface=None, id=None, data=None):
@@ -168,10 +179,10 @@ def get(verbose=False, filter="", price=None, garden=None, surface=None, id=None
         # print(_data.keys())
         if verbose:
             print("""{id} \033[32m{address:<15} {price:<10} {url}\033[m
-\033[1mdate :\033[m {date}
-\033[1msurface :\033[m {surface}
-\033[1mjardin :\033[m {groundsurface}
-\033[1mdescription :\033[m {description}
+\t\033[1mdate :\033[m {date}
+\t\033[1msurface :\033[m {surface}
+\t\033[1mjardin :\033[m {groundsurface}
+\t\033[1mdescription :\033[m {description}
             """.format(
                 id=_data["id"],
                 address=_data["address"],
@@ -183,7 +194,7 @@ def get(verbose=False, filter="", price=None, garden=None, surface=None, id=None
                 description=_data["description"].strip(),
             ))
         else:
-            print("{id}\n{address:<15} {price:<10} {url}".format(
+            print("{id}\n\t{address:<15} {price:<10} {url}".format(
                 id=_data["id"],
                 address=_data["address"],
                 price=_data["price"],
