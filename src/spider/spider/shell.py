@@ -85,19 +85,28 @@ def __show(filter_str, price=None, garden=None, surface=None, id=None, data=None
     if price:
         if "price" in data and int(data['price']) > 0:
             _prices = []
-            if ":" in price:
+            if ">" in price[0]:
+                price = int(price[1:])
+                if price >= int(data['price']):
+                    return False
+            elif "<" in price[0]:
+                price = int(price[1:])
+                if price <= int(data['price']):
+                    return False
+            elif ":" in price:
                 _p = price.split(':')
                 if "%" in _p[1]:
                     _percent = int(_p[1].replace("%", ""))
                     _prices = [int(_p[0]) * (1 - _percent / 100), int(_p[0]) * (1 + _percent / 100)]
                 else:
                     _prices = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+                if _prices[0] > int(data['price']):
+                    return False
+                if int(data['price']) > _prices[1]:
+                    return False
             else:
-                _prices = [int(price), int(price)]
-            if _prices[0] > int(data['price']):
-                return False
-            if int(data['price']) > _prices[1]:
-                return False
+                if int(price) != price.split(':')[0]:
+                    return False
     if filter_str:
         filter_str = filter_str.lower()
         result = []
