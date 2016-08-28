@@ -34,6 +34,7 @@ class Spider:
 
         self.geolocator = Nominatim()
         self.plugins = import_plugin()
+        self.logger = cobwebs.getLogger("spider.api")
 
     def __get_geocode(self, address):
         _location = None
