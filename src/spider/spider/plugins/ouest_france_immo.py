@@ -54,10 +54,16 @@ class ofi(object):
         price = int(price)
         address = "".join(tree.xpath('/html/body/div/section/div/div/h2[@id="caractDetail"]/text()')).replace("Vente maison", "").strip()
         ground_surface = " ".join(tree.xpath('/html/body/div/section/div/div/div/ul/li[text()="Surf. terrain : "]/strong/text()')).replace(" ", "")
-        ground_surface = int(ground_surface.replace("m²", ""))
+        try:
+            ground_surface = int(ground_surface.replace("m²", ""))
+        except ValueError:
+            ground_surface = 0
         options = " ".join(tree.xpath('/html/body/div/section/div/div/div/ul/li[@class="options"]/text()'))
         surface = " ".join(tree.xpath('/html/body/div/section/div/div/div/ul/li[text()="Surf. habitable : "]/strong/text()')).replace(" ", "")
-        surface = int(surface.replace("m²", ""))
+        try:
+            surface = int(surface.replace("m²", ""))
+        except ValueError:
+            surface = 0
         date = " ".join(tree.xpath('/html/body/div/section/div/h2/em/text()')).replace(" ", "").split("-")[-1].strip()
         img_urls = map(lambda x: x.get("src"), tree.xpath('//ul/li/img'))
         img_urls = list(filter(lambda x: "photo" in x, img_urls))
@@ -71,6 +77,7 @@ class ofi(object):
             "groundsurface": ground_surface,
             "url": url,
             "img_urls": img_urls,
+            "show": True,
             "extra": {
                 "options": options
             },
