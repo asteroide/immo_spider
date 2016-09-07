@@ -207,7 +207,6 @@ class Router:
                     result.append(doc)
         elif filter:
             _filter = self.__get_mongo_filter(filter)
-            print(_filter)
             result = self.spider_db.features.find(_filter)
         elif geo_id:
             result = []
