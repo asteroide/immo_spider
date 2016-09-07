@@ -18,10 +18,13 @@ data = {
     'id': '',
     'price': '97 550\xa0€',
     'surface': '60m²',
+    'rooms': 4,
+    'bedroom': 3,
     'url': 'https://www.ouestfrance-immo.com/immobilier/vente/maison/lauzach-56-56109/10696538.htm'
 }
 """
 
+import re
 import logging
 import importlib
 import hashlib
@@ -30,6 +33,20 @@ from cobwebs.config import get_config
 from cobwebs.exceptions import AuthException
 
 config = get_config()
+
+
+def filter_id(function):
+    def wrapped(*args, **kwargs):
+        result = function(*args, **kwargs)
+        _result = []
+        for item in result:
+            try:
+                item.pop("_id")
+            except KeyError:
+                pass
+            _result.append(item)
+        return list(_result)
+    return wrapped
 
 
 class Router:
@@ -54,7 +71,13 @@ class Router:
             elif request["action"] == "purge":
                 response = self.purge()
             elif request["action"] == "get":
-                response = self.get(request["data"])
+                _filter = {}
+                _uuid = None
+                if "filter" in request["data"]:
+                    _filter = request["data"]["filter"]
+                if "uuid" in request["data"]:
+                    _uuid = request["data"]["uuid"]
+                response = self.get(filter=_filter, uuid=_uuid)
             else:
                 raise BaseException("Unknown command {}".format(request["action"]))
         else:
@@ -97,29 +120,90 @@ class Router:
             return True
         self.logger.error("Cannot find ad with UUID {}".format(uuid))
 
-    def get(self, data=dict()):
+    def __get_mongo_filter(self, filter):
+        self.logger.info("__get_mongo_filter {}".format(filter))
+        _mongo_filter = {"$and": []}
+        _mongo_filter_price = {}
+        if "show" in filter:
+            _mongo_filter["$and"].append({"show": filter["show"]})
+        else:
+            _mongo_filter["$and"].append({"show": True})
+        if "price" in filter:
+            _price = re.findall("[\d\.]+", filter['price'])[0]
+            if ">" in filter['price']:
+                _mongo_filter_price['price'] = {"$gt": _price}
+            elif "<" in filter['price']:
+                _mongo_filter_price['price'] = {"$lt": _price}
+            elif ">=" in filter['price']:
+                _mongo_filter_price['price'] = {"$gte": _price}
+            elif "<=" in filter['price']:
+                _mongo_filter_price['price'] = {"$lte": _price}
+            elif ":" in filter['price']:
+                _p = filter['price'].split(':')
+                if "%" in _p[1]:
+                    _percent = int(_p[1].replace("%", ""))
+                    _prices = [int(_p[0]) * (1 - _percent / 100),
+                               int(_p[0]) * (1 + _percent / 100)]
+                else:
+                    _prices = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+                _mongo_filter_price['$and'] = [{"price": {"$gte": _prices[0]}},
+                                               {"price": {"$lte": _prices[0]}}]
+            else:
+                _mongo_filter_price['price'] = _price
+            _mongo_filter["$and"].append(_mongo_filter_price)
+        if "text" in filter:
+            _mongo_filter_text = {"$text": {"$search": filter['text']}}
+            _mongo_filter["$and"].append(_mongo_filter_text)
+        _mongo_filter_surface = {}
+        if "surface" in filter:
+            _surface = re.findall("[\d\.]+", filter['surface'])[0]
+            if ">" in filter['surface']:
+                _mongo_filter_surface['surface'] = {"$gt": _surface}
+            elif "<" in filter['surface']:
+                _mongo_filter_surface['surface'] = {"$lt": _surface}
+            elif ">=" in filter['surface']:
+                _mongo_filter_surface['surface'] = {"$gte": _surface}
+            elif "<=" in filter['surface']:
+                _mongo_filter_surface['surface'] = {"$lte": _surface}
+            elif ":" in filter['surface']:
+                _p = filter['surface'].split(':')
+                if "%" in _p[1]:
+                    _percent = int(_p[1].replace("%", ""))
+                    _surfaces = [int(_p[0]) * (1 - _percent / 100),
+                                 int(_p[0]) * (1 + _percent / 100)]
+                else:
+                    _surfaces = [int(_p[0]) * (1 - int(_p[0])), int(_p[0]) * (1 + int(_p[0]))]
+                _mongo_filter_surface['$and'] = [{"surface": {"$gte": _surfaces[0]}},
+                                               {"surface": {"$lte": _surfaces[0]}}]
+            else:
+                _mongo_filter_surface['surface'] = _surface
+            _mongo_filter["$and"].append(_mongo_filter_surface)
+
+        self.logger.info("_mongo_filter {}".format(str(_mongo_filter)))
+        return _mongo_filter
+
+    @filter_id
+    def get(self, filter=dict(), uuid=None, geo_id=None):
         """Get one or more feature
 
-        :param data: a dictionary with the following parameters:
-            :param search: a search dictionary
+        :param filter: a dictionary with the following parameters:
+            :param filter: a search dictionary
             :param uuid: the ID of an ad
             :param geo_id: the GEOID of an ad
         :return: a list of features
         """
-        self.logger.debug("get {}".format(data))
-        search = data["search"] if "search" in data else None
-        uuid = data["uuid"] if "uuid" in data else None
-        geo_id = data["geo_id"] if "geo_id" in data else None
-        result = []
-        self.logger.debug("===> {} {} {}".format(search, geo_id, uuid))
-        if search:
-            return result.append(list(self.spider_db.features.find(search)))
-        elif uuid:
+        self.logger.debug("===> {} {} {}".format(filter, uuid, geo_id))
+        if uuid:
+            result = []
             for doc in self.spider_db.features.find():
-                if doc['id'] == uuid:
+                if doc['id'] == filter['uuid']:
                     doc.pop("_id")
                     result.append(doc)
+        elif filter:
+            _filter = self.__get_mongo_filter(filter)
+            result = self.spider_db.features.find(_filter)
         elif geo_id:
+            result = []
             for doc in self.spider_db.features.find():
                 if "show" in doc and not doc["show"]:
                     continue
@@ -129,10 +213,10 @@ class Router:
                     doc.pop("_id")
                     result.append(doc)
         else:
+            result = []
             for doc in self.spider_db.features.find():
                 doc.pop("_id")
                 result.append(doc)
-        # self.logger.debug("mongo.get result={}".format(result))
         return result
 
     def purge(self):

@@ -76,7 +76,7 @@ class Spider:
 
         return {"action": "sync", "number": len(ads), 'message': " ".join(map(lambda x: x['address'], ads))}
 
-    def get(self, req_data={}):
+    def get(self, req_data=None):
         if not req_data:
             request = {"action": "list", "data": None}
             data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])

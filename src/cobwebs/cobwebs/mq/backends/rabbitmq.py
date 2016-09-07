@@ -21,8 +21,9 @@ class RPCRabbitMQ(RPCLink):
 
         def on_request(ch, method, props, body):
             request = dict(json.loads(body.decode("utf-8")))
-            # print("calling callback {}".format(request))
+            self.logger.debug("calling callback {}".format(request))
             response = callback(ch, method, props, request)
+            self.logger.debug("response = {}".format(response))
 
             ch.basic_publish(exchange='',
                              routing_key=props.reply_to,
