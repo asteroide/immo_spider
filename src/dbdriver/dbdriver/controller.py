@@ -90,7 +90,7 @@ class Router:
         :param feature:
         :return: True if the feature was inserted in the database
         """
-        if not self.get({'uuid': data['id']}):
+        if not self.get(uuid=data['id']):
             data['show'] = True
             self.spider_db.features.insert(data)
             return True
@@ -121,7 +121,6 @@ class Router:
         self.logger.error("Cannot find ad with UUID {}".format(uuid))
 
     def __get_mongo_filter(self, filter):
-        self.logger.info("__get_mongo_filter {}".format(filter))
         _mongo_filter = {"$and": []}
         _mongo_filter_price = {}
         if "show" in filter:
@@ -179,7 +178,6 @@ class Router:
                 _mongo_filter_surface['surface'] = _surface
             _mongo_filter["$and"].append(_mongo_filter_surface)
 
-        self.logger.info("_mongo_filter {}".format(str(_mongo_filter)))
         return _mongo_filter
 
     @filter_id
@@ -196,7 +194,7 @@ class Router:
         if uuid:
             result = []
             for doc in self.spider_db.features.find():
-                if doc['id'] == filter['uuid']:
+                if doc['id'] == uuid:
                     doc.pop("_id")
                     result.append(doc)
         elif filter:
