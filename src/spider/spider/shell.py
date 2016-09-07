@@ -54,9 +54,9 @@ def purge(all, quickdelete):
     print("action: \033[1m{}\033[m".format(data["action"]))
     for _key, _value in data["data"].items():
         if _value:
-            print("\t{}: \033[32m{}\033[m".format(_key, _value))
+            print("\t{}: \033[32mOK\033[m".format(_key))
         else:
-            print("\t{}: \033[31m{}\033[m".format(_key, _value))
+            print("\t{}: \033[31mKO\033[m".format(_key))
 
 
 @click.command()
@@ -68,9 +68,9 @@ def hide(ids):
     print("action: \033[1m{}\033[m".format(data["action"]))
     for _key, _value in data["data"].items():
         if _value:
-            print("\t{}: \033[32m{}\033[m".format(_key, _value))
+            print("\t{}: \033[32mOK\033[m".format(_key))
         else:
-            print("\t{}: \033[31m{}\033[m".format(_key, _value))
+            print("\t{}: \033[31mKO\033[m".format(_key))
 
 
 @click.command()
@@ -82,9 +82,9 @@ def delete(ids):
     print("action: \033[1m{}\033[m".format(data["action"]))
     for _key, _value in data["data"].items():
         if _value:
-            print("\t{}: \033[32m{}\033[m".format(_key, _value))
+            print("\t{}: \033[32mOK\033[m".format(_key))
         else:
-            print("\t{}: \033[31m{}\033[m".format(_key, _value))
+            print("\t{}: \033[31mKO\033[m".format(_key))
 
 
 @click.command()
