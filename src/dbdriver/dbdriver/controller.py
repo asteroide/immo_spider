@@ -129,6 +129,10 @@ class Router:
             _mongo_filter["$and"].append({"show": True})
         if "price" in filter:
             _price = re.findall("[\d\.]+", filter['price'])[0]
+            try:
+                _price = int(_price)
+            except ValueError:
+                pass
             if ">" in filter['price']:
                 _mongo_filter_price['price'] = {"$gt": _price}
             elif "<" in filter['price']:
@@ -156,6 +160,10 @@ class Router:
         _mongo_filter_surface = {}
         if "surface" in filter:
             _surface = re.findall("[\d\.]+", filter['surface'])[0]
+            try:
+                _surface = int(_surface)
+            except ValueError:
+                pass
             if ">" in filter['surface']:
                 _mongo_filter_surface['surface'] = {"$gt": _surface}
             elif "<" in filter['surface']:
@@ -199,6 +207,7 @@ class Router:
                     result.append(doc)
         elif filter:
             _filter = self.__get_mongo_filter(filter)
+            print(_filter)
             result = self.spider_db.features.find(_filter)
         elif geo_id:
             result = []
