@@ -33,14 +33,22 @@ def sync():
 
 
 @click.command()
-@click.option("--all", is_flag=True, default=False, help="Purge all database")
-def purge(all):
-    if all:
+@click.option("--all", is_flag=True, default=False, help="Delete all item in database")
+@click.option("--quickdelete", is_flag=True, default=False, help="Purge all database")
+def purge(all, quickdelete):
+    if quickdelete:
         logger.info("Purging all...")
+        sp = Spider()
+        data = sp.purge(quick_delete=True)
+        print("action: \033[1mPurging all\033[m")
+        print("\t{} items deleted".format(data['data']))
+        return
+    elif all:
+        logger.info("Delete all...")
         sp = Spider()
         data = sp.purge()
     else:
-        logger.info("Purging hidden articles...")
+        logger.info("Delete hidden articles...")
         sp = Spider()
         data = sp.purge(hidden=True)
     print("action: \033[1m{}\033[m".format(data["action"]))

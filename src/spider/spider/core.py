@@ -88,8 +88,12 @@ class Spider:
             for _data in data:
                 yield _data
 
-    def purge(self, hidden=False):
-        if hidden:
+    def purge(self, only_hidden=False, quick_delete=False):
+        if quick_delete:
+            request = {"action": "purge", "data": None}
+            data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
+            request['data'] = data
+        elif only_hidden:
             request = {"action": "purge", "data": None}
             ids = {}
             data = self.get()
@@ -100,8 +104,12 @@ class Spider:
             request['data'] = ids
         else:
             request = {"action": "purge", "data": None}
-            data = self.mq_driver.rpc.send("db_driver", json.dumps(request), self.global_config['main']['mq_host'])
-            request['data'] = data
+            ids = {}
+            data = self.get()
+            for item in data:
+                ret = self.delete((item['id'],))
+                ids[item['id']] = ret['data'][item['id']]
+            request['data'] = ids
         return request
 
     def delete(self, ids):
