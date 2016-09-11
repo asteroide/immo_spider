@@ -224,7 +224,7 @@ class Router:
                     result.append(doc)
         else:
             result = []
-            for doc in self.spider_db.features.find():
+            for doc in self.spider_db.features.find({"show": True}):
                 doc.pop("_id")
                 result.append(doc)
         return result
