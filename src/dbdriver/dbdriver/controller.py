@@ -155,7 +155,10 @@ class Router:
                 _mongo_filter_price['price'] = _price
             _mongo_filter["$and"].append(_mongo_filter_price)
         if "text" in filter:
-            _mongo_filter_text = {"$text": {"$search": filter['text']}}
+            _mongo_filter_text = {"$or": [
+                {"address": {"$regex": filter['text']}},
+                {"description": {"$regex": filter['text']}}
+            ]}
             _mongo_filter["$and"].append(_mongo_filter_text)
         _mongo_filter_surface = {}
         if "surface" in filter:
@@ -186,6 +189,7 @@ class Router:
                 _mongo_filter_surface['surface'] = _surface
             _mongo_filter["$and"].append(_mongo_filter_surface)
 
+        self.logger.info("mongo_filter {}".format(_mongo_filter))
         return _mongo_filter
 
     @filter_id
