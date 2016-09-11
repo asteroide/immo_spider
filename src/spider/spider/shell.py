@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import requests
 import click
 from spider import Spider
 import cobwebs
@@ -50,7 +51,16 @@ def purge(all, quickdelete):
     else:
         logger.info("Delete hidden articles...")
         sp = Spider()
-        data = sp.purge(hidden=True)
+        data = sp.get(req_data={"filter": {"show": False}})
+        ids = []
+        for i in data:
+            sys.stderr.write(".")
+            sys.stderr.flush()
+            req = requests.get(i["url"], verify=True)
+            if req.status_code > 204:
+                ids.append(i["id"])
+        print("")
+        data = sp.delete(ids)
     print("action: \033[1m{}\033[m".format(data["action"]))
     for _key, _value in data["data"].items():
         if _value:
