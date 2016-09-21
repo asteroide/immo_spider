@@ -104,7 +104,8 @@ def delete(ids):
 @click.option('--garden/--no-garden', help='Filter on the presence of a garden.', default=None)
 @click.option('--surface', '-s', help='Filter on surface (ex: 100:5%)')
 @click.option('--id', '-i', help='Filter on ID')
-def get(verbose=False, filter="", price=None, garden=None, surface=None, id=None):
+@click.option('--content', '-c', help='Only show value')
+def get(verbose=False, filter="", price=None, garden=None, surface=None, id=None, content=""):
 
     sp = Spider()
 
@@ -132,11 +133,20 @@ def get(verbose=False, filter="", price=None, garden=None, surface=None, id=None
                 description=_data["description"].strip(),
             ))
         else:
-            print("{id}\n\t{address:<15} {price:<10} {url}".format(
-                id=_data["id"],
-                address=_data["address"],
-                price=_data["price"],
-                url=_data["url"]))
+            output = []
+            if content:
+                for value in content.split(','):
+                    if value == "url":
+                        output.append(_data["url"])
+                    if value == "address":
+                        output.append("{address:<15}".format(address=_data["address"]))
+                    if value == "price":
+                        output.append("{price:<8}".format(price=_data["price"]))
+            else:
+                output.append("{address:<15}".format(address=_data["address"]))
+                output.append("{price:<8}".format(price=_data["price"]))
+                output.append(_data["url"])
+            print(" ".join(output))
 
 
 commands = (help, sync, get, purge)
