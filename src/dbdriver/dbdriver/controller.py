@@ -113,10 +113,10 @@ class Router:
 
     def hide(self, uuid):
         count = self.spider_db.features.update_one(
-            {"id": uuid},
+            {"$or": [{"id": uuid}, {"url": uuid}]},
             {"$set": {"show": False}}
         )
-        if count.acknowledged:
+        if count.modified_count > 0:
             return True
         self.logger.error("Cannot find ad with UUID {}".format(uuid))
 
@@ -189,7 +189,7 @@ class Router:
                 _mongo_filter_surface['surface'] = _surface
             _mongo_filter["$and"].append(_mongo_filter_surface)
 
-        self.logger.info("mongo_filter {}".format(_mongo_filter))
+        self.logger.debug("mongo_filter {}".format(_mongo_filter))
         return _mongo_filter
 
     @filter_id
